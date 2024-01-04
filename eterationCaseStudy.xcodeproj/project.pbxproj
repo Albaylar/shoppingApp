@@ -192,7 +192,7 @@
 		69CC793F2B46B4A00086483E /* Profile */ = {
 			isa = PBXGroup;
 			children = (
-				69CC79362B46A1CB0086483E /* ProfileVC.swift */,
+				69CC79482B46B5780086483E /* View */,
 			);
 			name = Profile;
 			path = "pROFİLE";
@@ -209,7 +209,9 @@
 		69CC79412B46B4B80086483E /* Favorites */ = {
 			isa = PBXGroup;
 			children = (
-				69CC79342B46A1B20086483E /* FavoritesVC.swift */,
+				69CC794B2B46B59B0086483E /* Model */,
+				69CC794A2B46B5960086483E /* ViewModel */,
+				69CC79492B46B58A0086483E /* View */,
 			);
 			path = Favorites;
 			sourceTree = "<group>";
@@ -251,6 +253,37 @@
 			sourceTree = "<group>";
 		};
 		69CC79472B46B5120086483E /* Model */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = Model;
+			sourceTree = "<group>";
+		};
+		69CC79482B46B5780086483E /* View */ = {
+			isa = PBXGroup;
+			children = (
+				69CC79362B46A1CB0086483E /* ProfileVC.swift */,
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
+		69CC79492B46B58A0086483E /* View */ = {
+			isa = PBXGroup;
+			children = (
+				69CC79342B46A1B20086483E /* FavoritesVC.swift */,
+			);
+			name = View;
+			path = "vİEW";
+			sourceTree = "<group>";
+		};
+		69CC794A2B46B5960086483E /* ViewModel */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = ViewModel;
+			sourceTree = "<group>";
+		};
+		69CC794B2B46B59B0086483E /* Model */ = {
 			isa = PBXGroup;
 			children = (
 			);
