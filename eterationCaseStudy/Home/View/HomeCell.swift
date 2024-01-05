@@ -11,8 +11,9 @@ import AlamofireImage
 
 
 protocol HomeCellDelegate: AnyObject {
-    func addToBasketButtonTapped(for car: Car)
     func favoriteButtonTapped(for car: Car, isFavorite: Bool)
+    func addToCartButtonTapped(for car: Car)
+
 }
 
 class HomeCell: UICollectionViewCell {
@@ -25,11 +26,11 @@ class HomeCell: UICollectionViewCell {
     let addToCartButton = UIButton()
     let favoriteButton = UIButton()
     var isFavorite: Bool = false {
-        
         didSet {
             updateFavoriteButtonAppearance()
         }
     }
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         setupViews()
@@ -128,9 +129,10 @@ class HomeCell: UICollectionViewCell {
             }
         }
     @objc func addChartButtonTapped() {
-            if let car = car {
-                delegate?.addToBasketButtonTapped(for: car)
-            }
+        if let car = car {
+            print(car)
+            delegate?.addToCartButtonTapped(for: car)
         }
+    }
 }
 

@@ -5,14 +5,14 @@
 //  Created by Furkan Deniz Albaylar on 5.01.2024.
 //
 
+
 import Foundation
 import CoreData
 import UIKit
 
 class CarDetailViewModel {
-    private var car: Car
-
-    // Bir closure tanımlayarak favori durumu değiştiğinde bildirim yapılır
+    var car: Car
+    var isFavorite: Bool = false // Add this line
     var onFavoriteStatusChanged: ((Bool) -> Void)?
 
     init(car: Car) {
@@ -48,54 +48,39 @@ class CarDetailViewModel {
               let carId = car.id else { return }
         let managedContext = appDelegate.persistentContainer.viewContext
 
-        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Entity") // Entity adınızı girin
+        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Entity")
         fetchRequest.predicate = NSPredicate(format: "id == %@", carId)
 
         do {
             let results = try managedContext.fetch(fetchRequest)
-            onFavoriteStatusChanged?(results.count > 0)
+            let isFav = results.count > 0
+            self.isFavorite = isFav // Update isFavorite here
+            onFavoriteStatusChanged?(isFav)
         } catch let error as NSError {
-            print("Favori durumu kontrol edilirken hata oluştu: \(error), \(error.userInfo)")
-            onFavoriteStatusChanged?(false)
+            print("Error occurred: \(error), \(error.userInfo)")
+            DispatchQueue.main.async {
+                self.onFavoriteStatusChanged?(self.isFavorite)
+            }
         }
     }
 
     func updateFavoriteStatus(isFavorite: Bool) {
-        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate,
-              let carId = car.id else { return }
-        let managedContext = appDelegate.persistentContainer.viewContext
-
+        guard let id = car.id, let idInt = Int(id) else { return }
         if isFavorite {
-            // Favorilere ekle
-            let entity = NSEntityDescription.entity(forEntityName: "Entity", in: managedContext)! // Entity adınızı girin
-            let newFavorite = NSManagedObject(entity: entity, insertInto: managedContext)
-            newFavorite.setValue(carId, forKey: "id")
-            // Diğer özellikleri de ayarlayın
+            // Add to favorites
+            CoreDataManager.shared.saveCarsToCoreData(data: car)
         } else {
-            // Favorilerden çıkar
-            let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Entity") // Entity adınızı girin
-            fetchRequest.predicate = NSPredicate(format: "id == %@", carId)
-
-            do {
-                let results = try managedContext.fetch(fetchRequest)
-                for object in results {
-                    if let objectToDelete = object as? NSManagedObject {
-                        managedContext.delete(objectToDelete)
-                    }
-                }
-            } catch let error as NSError {
-                print("Favorilerden çıkarırken hata meydana geldi: \(error), \(error.userInfo)")
-            }
+            // Remove from favorites
+            CoreDataManager.shared.removeCarItemFromCoreData(id: idInt)
         }
 
-        do {
-            try managedContext.save()
-        } catch let error as NSError {
-            print("Favorilere eklerken/kaldırırken hata meydana geldi: \(error), \(error.userInfo)")
-        }
-
-        // Favori durumunu güncelle
+        // Update the favorite status
         onFavoriteStatusChanged?(isFavorite)
+        self.isFavorite = isFavorite // Update isFavorite here
+        NotificationCenter.default.post(name: NSNotification.Name("FavoritesUpdatedAgain"), object: nil, userInfo: ["carId": car.id])
+
     }
+    
 }
+
 

@@ -14,5 +14,5 @@ struct Detail {
     let description: String?
     let image: String?
     let brand: String?
-    // Diğer özellikler...
+    
 }

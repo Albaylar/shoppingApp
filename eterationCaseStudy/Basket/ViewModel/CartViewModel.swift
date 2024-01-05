@@ -12,17 +12,23 @@ class CartViewModel {
     private(set) var cartItems: [CartItem] = []
     
     // Sepete ürün ekler
-    func addProductToCart(productId: String, productName: String, price: Double) {
-        if let index = cartItems.firstIndex(where: { $0.productId == productId }) {
-            // Ürün zaten sepetteyse miktarını artır
-            cartItems[index].quantity += 1
-        } else {
-            // Ürün sepette yoksa yeni bir cart item oluştur ve ekle
-            let newItem = CartItem(productId: productId, productName: productName, quantity: 1, price: price)
-            cartItems.append(newItem)
+    func addProductToCart(productId: String, productName: String, priceString: String) {
+            // String tipindeki fiyatı Double tipine çevir
+            guard let price = Double(priceString) else {
+                print("Fiyat dönüştürülemedi")
+                return
+            }
+
+            if let index = cartItems.firstIndex(where: { $0.productId == productId }) {
+                // Ürün zaten sepetteyse miktarını artır
+                cartItems[index].quantity += 1
+            } else {
+                // Ürün sepette yoksa yeni bir cart item oluştur ve ekle
+                let newItem = CartItem(productId: productId, productName: productName, quantity: 1, price: price)
+                cartItems.append(newItem)
+            }
+            updateCart()
         }
-        updateCart()
-    }
     
     // Sepetten ürün çıkarır
     func removeProductFromCart(productId: String) {
@@ -31,7 +37,6 @@ class CartViewModel {
             updateCart()
         }
     }
-    
     // Sepetteki bir ürünün miktarını artırır
     func incrementQuantity(productId: String) {
         if let index = cartItems.firstIndex(where: { $0.productId == productId }) {
@@ -54,6 +59,7 @@ class CartViewModel {
     }
     
     // Sepetin toplam fiyatını hesaplar
+    
     var totalPrice: Double {
         cartItems.reduce(0) { $0 + $1.price * Double($1.quantity) }
     }

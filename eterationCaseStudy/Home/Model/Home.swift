@@ -15,5 +15,4 @@ struct Car: Codable {
     
 
 }
-
 typealias Cars = [Car]

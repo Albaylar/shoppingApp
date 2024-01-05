@@ -14,6 +14,7 @@ class HomeVC: UIViewController {
     private let debouncer = Debouncer(delay: 0)
     private var viewModel = HomeViewModel()
     private let favoritesViewModel = FavoriteViewModel()
+    private let basketVC = BasketVC()
     let collectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
     var containerView: UIView?
     
@@ -23,10 +24,8 @@ class HomeVC: UIViewController {
         viewModel.loadAllCars() {
             self.collectionView.reloadData()
         }
-        
+        NotificationCenter.default.addObserver(self, selector: #selector(favoriteStatusChanged(_:)), name: NSNotification.Name("FavoritesUpdatedAgain"), object: nil)
     }
-    
-    
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         configureCollectionViewLayout()
@@ -159,14 +158,11 @@ extension HomeVC : UICollectionViewDataSource, UICollectionViewDelegate {
         let detailVC = CarDetailVC()
         let carDetailViewModel = CarDetailViewModel(car: selectedCar)
         detailVC.viewModel = carDetailViewModel
-        
         // containerView ve detay görünümünü oluştur
         containerView = UIView(frame: self.view.bounds)
         containerView?.backgroundColor = UIColor.black.withAlphaComponent(0.5)
         guard let containerView = containerView else { return }
-        
         self.view.addSubview(containerView)
-        
         // CarDetailVC görünümünü containerView'a ekle
         addChild(detailVC)
         containerView.addSubview(detailVC.view)
@@ -185,10 +181,23 @@ extension HomeVC : UICollectionViewDataSource, UICollectionViewDelegate {
     @objc func favoriteUpdate() {
         // Favoriler listesini yeniden yükleyin
         favoritesViewModel.fetchFavorites()
-        
         // collectionView'u yenileyin
         collectionView.reloadData()
     }
+    @objc private func favoriteStatusChanged(_ notification: Notification) {
+        guard let updatedCarId = notification.userInfo?["carId"] as? String else { return }
+
+        // Bul ve güncelle
+        for (index, car) in viewModel.cars.enumerated() {
+            if car.id == updatedCarId {
+                let indexPath = IndexPath(item: index, section: 0)
+                if let cell = collectionView.cellForItem(at: indexPath) as? HomeCell {
+                    cell.isFavorite = CoreDataManager.shared.isCarSaved(id: Int(updatedCarId) ?? 0)
+                }
+            }
+        }
+    }
+
     
     
 }
@@ -204,49 +213,28 @@ extension HomeVC: FilterViewControllerDelegate {
     }
 }
 extension HomeVC: HomeCellDelegate {
-    func addToBasketButtonTapped(for car: Car) {
-        print("")
+    func addToCartButtonTapped(for car: Car) {
+        // Assuming 'saveCarToCart' is a method you will implement in CoreDataManager
+        //CoreDataManager.shared.saveCarToCart(data: car)
+        print("Car added to cart")
+        NotificationCenter.default.post(name: NSNotification.Name("BasketUpdated"), object: nil)
     }
     
     func favoriteButtonTapped(for car: Car, isFavorite: Bool) {
-        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else { return }
-        let managedContext = appDelegate.persistentContainer.viewContext
-        
         if isFavorite {
-            // Favorilere Ekle
-            let entity = NSEntityDescription.entity(forEntityName: "Entity", in: managedContext)!
-            let favoriteCar = NSManagedObject(entity: entity, insertInto: managedContext)
-            favoriteCar.setValue(car.id, forKeyPath: "id")
-            favoriteCar.setValue(car.name, forKeyPath: "name")
-            favoriteCar.setValue(car.price, forKeyPath: "price")
-            print("Favorilere eklendi: \(favoriteCar)")
-            
+            CoreDataManager.shared.saveCarsToCoreData(data: car)
+            print("Car added to favorites")
         } else {
-            // Favorilerden Çıkar
-            let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Entity")
-            fetchRequest.predicate = NSPredicate(format: "id = %@", car.id ?? "")
-            
-            do {
-                let results = try managedContext.fetch(fetchRequest)
-                for object in results {
-                    guard let objectData = object as? NSManagedObject else {continue}
-                    managedContext.delete(objectData)
-                    print("Favorilerden çıkarıldı: \(objectData)")
-                }
-            } catch let error as NSError {
-                print("Favorilerden çıkarırken hata meydana geldi: \(error), \(error.userInfo)")
+            if let id = Int(car.id!) { // Convert to Int, handle non-convertible cases
+                CoreDataManager.shared.removeCarItemFromCoreData(id: id)
+                print("Car removed from favorites")
             }
-        }
-        
-        // Değişiklikleri kaydet
-        do {
-            try managedContext.save()
-        } catch let error as NSError {
-            print("Favorilere eklerken/kaldırırken hata meydana geldi: \(error), \(error.userInfo)")
         }
         NotificationCenter.default.post(name: NSNotification.Name("FavoritesUpdated"), object: nil)
     }
 }
+
+
 
 
 

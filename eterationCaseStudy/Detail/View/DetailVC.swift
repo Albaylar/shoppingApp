@@ -12,9 +12,10 @@ import AlamofireImage
 
 
 class CarDetailVC: UIViewController {
+    
     var viewModel: CarDetailViewModel?
     var onClose: (() -> Void)?
-    // UI Elemanları
+    
     private let nameLabel = UILabel()
     private let priceLabel = UILabel()
     private let descriptionLabel = UILabel()
@@ -22,15 +23,21 @@ class CarDetailVC: UIViewController {
     private let brandNameLabel = UILabel()
     private var isFavorite = false
     let starView = UIButton()
-    
     let topLabel = UILabel()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
-        checkFavoriteStatus()
+        NotificationCenter.default.addObserver(self, selector: #selector(favoriteStatusChanged(_:)), name: .favoriteStatusChanged, object: nil)
         setupUI()
         displayCarDetails()
+        viewModel?.onFavoriteStatusChanged = { [weak self] isFavorite in
+            self?.updateFavoriteIcon(isFavorite: isFavorite)
+        }
+    }
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        viewModel?.checkIfFavorite()
     }
     
     private func setupUI() {
@@ -78,18 +85,14 @@ class CarDetailVC: UIViewController {
         starView.setImage(UIImage(systemName: "star"), for: .normal)
         starView.layer.zPosition = 1
         starView.isUserInteractionEnabled = true
-        
-        starView.addTarget(self, action: #selector(favoriteButtonTapped), for: .touchUpInside) // Add this line
-        carImageView.addSubview(starView)
+        starView.addTarget(self, action: #selector(favoriteButtonTapped), for: .touchUpInside)
+        view.addSubview(starView)
         starView.snp.makeConstraints { make in
             make.top.equalTo(carImageView.snp.top).offset(10)
             make.right.equalTo(carImageView.snp.right).inset(10)
             make.height.equalTo(24)
             make.width.equalTo(24)
         }
-        
-        
-        
         // nameLabel Yapılandırması
         nameLabel.font = UIFont.systemFont(ofSize: 20, weight: .bold)
         nameLabel.textAlignment = .left
@@ -106,7 +109,7 @@ class CarDetailVC: UIViewController {
             make.left.right.equalToSuperview().inset(16)
             make.bottom.equalTo(view.safeAreaLayoutGuide).inset(80)
         }
-
+        
         // descriptionLabel Yapılandırması
         descriptionLabel.font = UIFont.systemFont(ofSize: 18)
         descriptionLabel.numberOfLines = 0
@@ -115,7 +118,7 @@ class CarDetailVC: UIViewController {
             make.edges.equalToSuperview()
             make.width.equalTo(scrollView.snp.width)
         }
-
+        
         
         view.addSubview(priceLabel)
         priceLabel.numberOfLines = 2
@@ -142,6 +145,12 @@ class CarDetailVC: UIViewController {
             make.width.equalTo(182)
         }
         
+    }
+    @objc private func favoriteStatusChanged(_ notification: Notification) {
+        guard let carId = notification.userInfo?["carId"] as? String, carId == viewModel?.id else {
+            return
+        }
+        viewModel?.checkIfFavorite()
     }
     
     private func displayCarDetails() {
@@ -184,69 +193,15 @@ class CarDetailVC: UIViewController {
         onClose?()
         
     }
-    private func checkFavoriteStatus() {
-        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate,
-              let carId = viewModel?.id else { return }
-        let managedContext = appDelegate.persistentContainer.viewContext
-        
-        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Entity") // Entity adınızı girin
-        fetchRequest.predicate = NSPredicate(format: "id == %@", carId)
-        
-        do {
-            let results = try managedContext.fetch(fetchRequest)
-            isFavorite = results.count > 0
-        } catch let error as NSError {
-            print("Favori durumu kontrol edilirken hata oluştu: \(error), \(error.userInfo)")
-            isFavorite = false
+    @objc private func favoriteButtonTapped() {
+        if let isFavorite = viewModel?.isFavorite {
+            viewModel?.updateFavoriteStatus(isFavorite: !isFavorite)
         }
-        
-        updateFavoriteIcon()
     }
-    
-    private func updateFavoriteIcon() {
+
+    private func updateFavoriteIcon(isFavorite: Bool) {
         let iconName = isFavorite ? "star.fill" : "star"
         starView.setImage(UIImage(systemName: iconName), for: .normal)
     }
     
-    @objc private func favoriteButtonTapped() {
-        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate,
-              let carId = viewModel?.id else { return }
-        let managedContext = appDelegate.persistentContainer.viewContext
-        
-        isFavorite.toggle()
-        
-        if isFavorite {
-            // Favorilere ekle
-            let entity = NSEntityDescription.entity(forEntityName: "Entity", in: managedContext)! // Entity adınızı girin
-            let newFavorite = NSManagedObject(entity: entity, insertInto: managedContext)
-            newFavorite.setValue(carId, forKey: "id")
-            // Diğer özellikleri de ayarlayın
-        } else {
-            // Favorilerden çıkar
-            let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Entity") // Entity adınızı girin
-            fetchRequest.predicate = NSPredicate(format: "id == %@", carId)
-            
-            do {
-                let results = try managedContext.fetch(fetchRequest)
-                for object in results {
-                    if let objectToDelete = object as? NSManagedObject {
-                        managedContext.delete(objectToDelete)
-                    }
-                }
-            } catch let error as NSError {
-                print("Favorilerden çıkarırken hata meydana geldi: \(error), \(error.userInfo)")
-            }
-        }
-        
-        do {
-            try managedContext.save()
-            NotificationCenter.default.post(name: NSNotification.Name("FavoritesUpdated"), object: nil)
-        } catch let error as NSError {
-            print("Favorilere eklerken/kaldırırken hata meydana geldi: \(error), \(error.userInfo)")
-        }
-        
-        updateFavoriteIcon()
-    }
-    
 }
-

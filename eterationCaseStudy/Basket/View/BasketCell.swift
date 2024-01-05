@@ -12,18 +12,26 @@ import SnapKit
 
 class BasketCell: UITableViewCell {
     
-    let productNameLabel = UILabel()
+        let productNameLabel = UILabel()
         let productPriceLabel = UILabel()
         let quantityLabel = UILabel()
         let incrementButton = UIButton()
         let decrementButton = UIButton()
-    var onQuantityChanged: ((Int) -> Void)?
+        var onQuantityChanged: ((Int) -> Void)?
+    
+    
+    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
+        super.init(style: style, reuseIdentifier: reuseIdentifier)
+        setupViews()
+    }
 
-        // Bu fonksiyon, arayüz öğelerini yapılandırır ve hücreye ekler.
+    required init?(coder aDecoder: NSCoder) {
+        super.init(coder: aDecoder)
+        setupViews()
+    }
+
+        
         func setupViews() {
-            
-
-            
             productNameLabel.translatesAutoresizingMaskIntoConstraints = false
             contentView.addSubview(productNameLabel)
             productNameLabel.snp.makeConstraints { make in
@@ -78,9 +86,8 @@ class BasketCell: UITableViewCell {
             }
         }
         
-        // Hücre içeriğini yapılandırmak için bir fonksiyon
+        
         func configure(with item: CartItem) {
-    
             productNameLabel.text = item.productName
             productPriceLabel.text = "\(item.price)₺"
             quantityLabel.text = "\(item.quantity)"
