@@ -7,11 +7,13 @@
 
 import UIKit
 import SnapKit
+import CoreData
 
 
 class HomeVC: UIViewController {
     private let debouncer = Debouncer(delay: 0)
     private var viewModel = HomeViewModel()
+    private let favoritesViewModel = FavoriteViewModel()
     let collectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
     var containerView: UIView?
     
@@ -21,7 +23,10 @@ class HomeVC: UIViewController {
         viewModel.loadAllCars() {
             self.collectionView.reloadData()
         }
+        
     }
+    
+    
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         configureCollectionViewLayout()
@@ -29,6 +34,7 @@ class HomeVC: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         
     }
+    
     private func setupUI(){
         view.backgroundColor = .white
         let topView = UIView()
@@ -137,53 +143,112 @@ extension HomeVC : UICollectionViewDataSource, UICollectionViewDelegate {
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: "HomeCell", for: indexPath) as? HomeCell else {
             return UICollectionViewCell()
         }
-        
         let car = viewModel.cars[indexPath.row]
-        cell.configure(with: car)
+        
+        // Favori durumunu kontrol et
+        let isFavorite = favoritesViewModel.isCarFavorite(carId: car.id ?? "")
+        
+        cell.delegate = self
+        cell.configure(with: car, isFavorite: isFavorite)
         
         return cell
     }
+    
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
-            let selectedCar = viewModel.cars[indexPath.row]
-            let detailVC = CarDetailVC()
-            let carDetailViewModel = CarDetailViewModel(car: selectedCar)
-            detailVC.viewModel = carDetailViewModel
-
-            // containerView ve detay görünümünü oluştur
-            containerView = UIView(frame: self.view.bounds)
-            containerView?.backgroundColor = UIColor.black.withAlphaComponent(0.5)
-            guard let containerView = containerView else { return }
-            
-            self.view.addSubview(containerView)
-
-            // CarDetailVC görünümünü containerView'a ekle
-            addChild(detailVC)
-            containerView.addSubview(detailVC.view)
-            detailVC.view.frame = containerView.bounds
-            detailVC.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-            detailVC.didMove(toParent: self)
-
-            // Geri dönüş işlemi için bir closure veya delegate tanımla
-            detailVC.onClose = { [weak self] in
-                containerView.removeFromSuperview()
-                detailVC.view.removeFromSuperview()
-                detailVC.removeFromParent()
-            }
+        let selectedCar = viewModel.cars[indexPath.row]
+        let detailVC = CarDetailVC()
+        let carDetailViewModel = CarDetailViewModel(car: selectedCar)
+        detailVC.viewModel = carDetailViewModel
+        
+        // containerView ve detay görünümünü oluştur
+        containerView = UIView(frame: self.view.bounds)
+        containerView?.backgroundColor = UIColor.black.withAlphaComponent(0.5)
+        guard let containerView = containerView else { return }
+        
+        self.view.addSubview(containerView)
+        
+        // CarDetailVC görünümünü containerView'a ekle
+        addChild(detailVC)
+        containerView.addSubview(detailVC.view)
+        detailVC.view.frame = containerView.bounds
+        detailVC.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        detailVC.didMove(toParent: self)
+        
+        // Geri dönüş işlemi için bir closure veya delegate tanımla
+        detailVC.onClose = { [weak self] in
+            containerView.removeFromSuperview()
+            detailVC.view.removeFromSuperview()
+            detailVC.removeFromParent()
         }
-
-
+        
+    }
+    @objc func favoriteUpdate() {
+        // Favoriler listesini yeniden yükleyin
+        favoritesViewModel.fetchFavorites()
+        
+        // collectionView'u yenileyin
+        collectionView.reloadData()
+    }
+    
+    
 }
 extension HomeVC: FilterViewControllerDelegate {
     func didApplyFilters(brand: String?, model: String?, sortOption: SortOption?) {
         viewModel.filterCars(brand: brand, model: model, sortOption: sortOption)
-
+        
         print("Filtrelenmiş araç sayısı: \(viewModel.cars.count)")
-
+        
         DispatchQueue.main.async {
             self.collectionView.reloadData()
         }
     }
 }
+extension HomeVC: HomeCellDelegate {
+    func addToBasketButtonTapped(for car: Car) {
+        print("")
+    }
+    
+    func favoriteButtonTapped(for car: Car, isFavorite: Bool) {
+        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else { return }
+        let managedContext = appDelegate.persistentContainer.viewContext
+        
+        if isFavorite {
+            // Favorilere Ekle
+            let entity = NSEntityDescription.entity(forEntityName: "Entity", in: managedContext)!
+            let favoriteCar = NSManagedObject(entity: entity, insertInto: managedContext)
+            favoriteCar.setValue(car.id, forKeyPath: "id")
+            favoriteCar.setValue(car.name, forKeyPath: "name")
+            favoriteCar.setValue(car.price, forKeyPath: "price")
+            print("Favorilere eklendi: \(favoriteCar)")
+            
+        } else {
+            // Favorilerden Çıkar
+            let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Entity")
+            fetchRequest.predicate = NSPredicate(format: "id = %@", car.id ?? "")
+            
+            do {
+                let results = try managedContext.fetch(fetchRequest)
+                for object in results {
+                    guard let objectData = object as? NSManagedObject else {continue}
+                    managedContext.delete(objectData)
+                    print("Favorilerden çıkarıldı: \(objectData)")
+                }
+            } catch let error as NSError {
+                print("Favorilerden çıkarırken hata meydana geldi: \(error), \(error.userInfo)")
+            }
+        }
+        
+        // Değişiklikleri kaydet
+        do {
+            try managedContext.save()
+        } catch let error as NSError {
+            print("Favorilere eklerken/kaldırırken hata meydana geldi: \(error), \(error.userInfo)")
+        }
+        NotificationCenter.default.post(name: NSNotification.Name("FavoritesUpdated"), object: nil)
+    }
+}
+
+
 
 
 

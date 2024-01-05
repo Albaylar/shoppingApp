@@ -17,6 +17,7 @@ enum SortOption {
 class HomeViewModel {
     var allCars: [Car] = [] // Tüm araçların listesi
     var cars: [Car] = [] // Filtrelenmiş veya gösterilecek araçların listesi
+    
     private let carService = CarService.shared
     private let debouncer = Debouncer(delay: 0.5)
     
@@ -63,21 +64,21 @@ class HomeViewModel {
                 } else {
                     return true
                 }
+                if let sortOption = sortOption {
+                        switch sortOption {
+                        case .priceAscending:
+                            cars.sort { (Double($0.price ?? "") ?? 0.0) < (Double($1.price ?? "") ?? 0.0) }
+                        case .priceDescending:
+                            cars.sort { (Double($0.price ?? "") ?? 0.0) > (Double($1.price ?? "") ?? 0.0) }
+                        case .dateAscending:
+                            print("")
+                        case .dateDescending:
+                            print("")
+                        }
+                    }
             }
 
-            // Sıralama işlemleri
-            if let sortOption = sortOption {
-                switch sortOption {
-                case .priceAscending:
-                    cars.sort { (Int($0.price ?? "") ?? 0) < (Int($1.price ?? "") ?? 0) }
-                case .priceDescending:
-                    cars.sort { (Int($0.price ?? "") ?? 0) > (Int($1.price ?? "") ?? 0) }
-                case .dateAscending: break
-                    // Burada tarihleri artan sırada sıralayabilirsiniz
-                case .dateDescending: break
-                    // Burada tarihleri azalan sırada sıralayabilirsiniz
-                }
-            }
+            
         }
 }
 

@@ -7,6 +7,9 @@
 
 import UIKit
 import SnapKit
+import CoreData
+import AlamofireImage
+
 
 class CarDetailVC: UIViewController {
     var viewModel: CarDetailViewModel?
@@ -17,13 +20,15 @@ class CarDetailVC: UIViewController {
     private let descriptionLabel = UILabel()
     private let carImageView = UIImageView()
     private let brandNameLabel = UILabel()
+    private var isFavorite = false
+    let starView = UIButton()
     
     let topLabel = UILabel()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
-        
+        checkFavoriteStatus()
         setupUI()
         displayCarDetails()
     }
@@ -70,6 +75,20 @@ class CarDetailVC: UIViewController {
             make.left.right.equalToSuperview().inset(15)
             make.height.equalTo(225) // İmajın yüksekliği
         }
+        starView.setImage(UIImage(systemName: "star"), for: .normal)
+        starView.layer.zPosition = 1
+        starView.isUserInteractionEnabled = true
+        
+        starView.addTarget(self, action: #selector(favoriteButtonTapped), for: .touchUpInside) // Add this line
+        carImageView.addSubview(starView)
+        starView.snp.makeConstraints { make in
+            make.top.equalTo(carImageView.snp.top).offset(10)
+            make.right.equalTo(carImageView.snp.right).inset(10)
+            make.height.equalTo(24)
+            make.width.equalTo(24)
+        }
+        
+        
         
         // nameLabel Yapılandırması
         nameLabel.font = UIFont.systemFont(ofSize: 20, weight: .bold)
@@ -79,15 +98,24 @@ class CarDetailVC: UIViewController {
             make.top.equalTo(carImageView.snp.bottom).offset(16)
             make.left.right.equalToSuperview().inset(16)
         }
-        
+        let scrollView = UIScrollView()
+        scrollView.isUserInteractionEnabled = true
+        view.addSubview(scrollView)
+        scrollView.snp.makeConstraints { make in
+            make.top.equalTo(nameLabel.snp.bottom).offset(16)
+            make.left.right.equalToSuperview().inset(16)
+            make.bottom.equalTo(view.safeAreaLayoutGuide).inset(80)
+        }
+
         // descriptionLabel Yapılandırması
         descriptionLabel.font = UIFont.systemFont(ofSize: 18)
         descriptionLabel.numberOfLines = 0
-        view.addSubview(descriptionLabel)
+        scrollView.addSubview(descriptionLabel)
         descriptionLabel.snp.makeConstraints { make in
-            make.top.equalTo(nameLabel.snp.bottom).offset(16)
-            make.left.right.equalToSuperview().inset(16)
+            make.edges.equalToSuperview()
+            make.width.equalTo(scrollView.snp.width)
         }
+
         
         view.addSubview(priceLabel)
         priceLabel.numberOfLines = 2
@@ -148,6 +176,7 @@ class CarDetailVC: UIViewController {
         }
         
     }
+    
     @objc private func addChartButtonTapped(){
         
     }
@@ -155,5 +184,69 @@ class CarDetailVC: UIViewController {
         onClose?()
         
     }
+    private func checkFavoriteStatus() {
+        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate,
+              let carId = viewModel?.id else { return }
+        let managedContext = appDelegate.persistentContainer.viewContext
+        
+        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Entity") // Entity adınızı girin
+        fetchRequest.predicate = NSPredicate(format: "id == %@", carId)
+        
+        do {
+            let results = try managedContext.fetch(fetchRequest)
+            isFavorite = results.count > 0
+        } catch let error as NSError {
+            print("Favori durumu kontrol edilirken hata oluştu: \(error), \(error.userInfo)")
+            isFavorite = false
+        }
+        
+        updateFavoriteIcon()
+    }
+    
+    private func updateFavoriteIcon() {
+        let iconName = isFavorite ? "star.fill" : "star"
+        starView.setImage(UIImage(systemName: iconName), for: .normal)
+    }
+    
+    @objc private func favoriteButtonTapped() {
+        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate,
+              let carId = viewModel?.id else { return }
+        let managedContext = appDelegate.persistentContainer.viewContext
+        
+        isFavorite.toggle()
+        
+        if isFavorite {
+            // Favorilere ekle
+            let entity = NSEntityDescription.entity(forEntityName: "Entity", in: managedContext)! // Entity adınızı girin
+            let newFavorite = NSManagedObject(entity: entity, insertInto: managedContext)
+            newFavorite.setValue(carId, forKey: "id")
+            // Diğer özellikleri de ayarlayın
+        } else {
+            // Favorilerden çıkar
+            let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Entity") // Entity adınızı girin
+            fetchRequest.predicate = NSPredicate(format: "id == %@", carId)
+            
+            do {
+                let results = try managedContext.fetch(fetchRequest)
+                for object in results {
+                    if let objectToDelete = object as? NSManagedObject {
+                        managedContext.delete(objectToDelete)
+                    }
+                }
+            } catch let error as NSError {
+                print("Favorilerden çıkarırken hata meydana geldi: \(error), \(error.userInfo)")
+            }
+        }
+        
+        do {
+            try managedContext.save()
+            NotificationCenter.default.post(name: NSNotification.Name("FavoritesUpdated"), object: nil)
+        } catch let error as NSError {
+            print("Favorilere eklerken/kaldırırken hata meydana geldi: \(error), \(error.userInfo)")
+        }
+        
+        updateFavoriteIcon()
+    }
+    
 }
 

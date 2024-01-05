@@ -18,7 +18,7 @@ class TabBarVC: UITabBarController {
     private func setupUI() {
         let viewController1 = HomeVC()
         let viewController2 = BasketVC()
-        let viewController3 = FavoritesVC()
+        let viewController3 = FavoriteVC()
         let viewController4 = ProfileVC()
         
         

@@ -12,10 +12,13 @@ import AlamofireImage
 
 protocol HomeCellDelegate: AnyObject {
     func addToBasketButtonTapped(for car: Car)
+    func favoriteButtonTapped(for car: Car, isFavorite: Bool)
 }
 
 class HomeCell: UICollectionViewCell {
     weak var delegate: HomeCellDelegate?
+    var car: Car?
+    let homeViewModel = HomeViewModel()
     let imageView = UIImageView()
     let titleLabel = UILabel()
     let priceLabel = UILabel()
@@ -96,29 +99,38 @@ class HomeCell: UICollectionViewCell {
     private func updateFavoriteButtonAppearance() {
         if isFavorite {
             favoriteButton.setImage(UIImage(systemName: "star.fill"), for: .normal)
+            print(isFavorite)
             favoriteButton.tintColor = .yellow // Favori ise sarı renk
         } else {
             favoriteButton.setImage(UIImage(systemName: "star"), for: .normal)
             favoriteButton.tintColor = .gray // Değilse gri renk
         }
     }
-    func configure(with car: Car) {
+    func configure(with car: Car, isFavorite: Bool) {
+        self.car = car
+        self.isFavorite = isFavorite
+
+        titleLabel.text = car.name
         priceLabel.text = "\(car.price ?? "") ₺"
-        titleLabel.text = car.name ?? ""
         if let imageUrl = car.image, let url = URL(string: imageUrl) {
             imageView.af.setImage(withURL: url)
         }
+        updateFavoriteButtonAppearance()
     }
+
     @objc private func favoriteButtonTapped() {
-        isFavorite.toggle()
-        DispatchQueue.main.async {
-            self.updateFavoriteButtonAppearance()
+            isFavorite.toggle()
+            DispatchQueue.main.async {
+                self.updateFavoriteButtonAppearance()
+            }
+            if let car = car {
+                delegate?.favoriteButtonTapped(for: car, isFavorite: isFavorite)
+            }
         }
-    }
     @objc func addChartButtonTapped() {
-//           if let car = car { // Assume you have a car property in your HomeCell
-//               delegate?.addToBasketButtonTapped(for: car)
-//           }
-       }
+            if let car = car {
+                delegate?.addToBasketButtonTapped(for: car)
+            }
+        }
 }
 
