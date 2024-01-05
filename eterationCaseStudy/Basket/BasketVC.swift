@@ -9,21 +9,20 @@ import UIKit
 
 class BasketVC: UIViewController {
 
+    var basketItems: [Car] = []
+
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
         // Do any additional setup after loading the view.
     }
-    
 
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using segue.destination.
-        // Pass the selected object to the new view controller.
+    func addToBasket(car: Car) {
+        self.basketItems.append(car)
+        updateUI()
     }
-    */
 
+    func updateUI() {
+        // Implement your code to update the UI (e.g., reload a table view)
+    }
 }

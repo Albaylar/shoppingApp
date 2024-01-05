@@ -21,10 +21,12 @@ class TabBarVC: UITabBarController {
         let viewController3 = FavoritesVC()
         let viewController4 = ProfileVC()
         
+        
         viewController1.tabBarItem = UITabBarItem(title: "", image: UIImage(systemName: "house"), tag: 0)
         viewController2.tabBarItem = UITabBarItem(title: "", image: UIImage(named: "basketIcon"), tag: 1)
         viewController3.tabBarItem = UITabBarItem(title: "", image: UIImage(named: "favoritesIcon"), tag: 2)
         viewController4.tabBarItem = UITabBarItem(title: "", image: UIImage(named: "profileIcon"), tag: 3)
+        
         
         viewControllers = [viewController1, viewController2, viewController3, viewController4]
     }
