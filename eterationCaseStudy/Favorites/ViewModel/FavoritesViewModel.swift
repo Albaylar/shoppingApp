@@ -20,13 +20,10 @@ class FavoriteViewModel {
         
         guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else { return }
         let managedContext = appDelegate.persistentContainer.viewContext
-
-        let fetchRequest = NSFetchRequest<NSManagedObject>(entityName: "Entity") // Entity adını doğru girin
+        let fetchRequest = NSFetchRequest<NSManagedObject>(entityName: "Entity")
 
         do {
             let fetchedCars = try managedContext.fetch(fetchRequest)
-
-            // Map fetched data to FavoriteCar model
             favoriteCars = fetchedCars.compactMap { managedObject in
                 guard
                     let id = managedObject.value(forKey: "id") as? String,
@@ -60,7 +57,6 @@ class FavoriteViewModel {
         }
 }
 extension FavoriteViewModel {
-    // Belirli bir aracın favori olup olmadığını kontrol eder
     func isCarFavorite(carId: String) -> Bool {
         return favoriteCars.contains(where: { $0.id == carId })
     }

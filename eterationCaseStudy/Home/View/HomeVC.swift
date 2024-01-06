@@ -10,30 +10,31 @@ import SnapKit
 import CoreData
 
 
-class HomeVC: UIViewController {
+final class HomeVC: UIViewController {
     private let debouncer = Debouncer(delay: 0)
     private var viewModel = HomeViewModel()
     private let favoritesViewModel = FavoriteViewModel()
     private let basketVC = BasketVC()
     let collectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
     var containerView: UIView?
+    private let spinner = UIActivityIndicatorView(style: .medium)
+    private let noResultLabel = UILabel()
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
-        viewModel.loadAllCars() {
-            self.collectionView.reloadData()
-        }
+        setupSpinner()
+        loadAllCars()
+        setupNoResultLabel()
+        
         NotificationCenter.default.addObserver(self, selector: #selector(favoriteStatusChanged(_:)), name: NSNotification.Name("FavoritesUpdatedAgain"), object: nil)
+        
     }
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         configureCollectionViewLayout()
     }
-    override func viewWillAppear(_ animated: Bool) {
-        
-    }
-    
     private func setupUI(){
         view.backgroundColor = .white
         let topView = UIView()
@@ -93,9 +94,14 @@ class HomeVC: UIViewController {
         collectionView.snp.makeConstraints { make in
             make.top.equalTo(selectFilterButton.snp.bottom).offset(24)
             make.right.left.equalToSuperview().inset(15)
-            make.bottom.equalTo(view.safeAreaLayoutGuide) // Alt constraint eklendi
+            make.bottom.equalTo(view.safeAreaLayoutGuide)
         }
         
+    }
+    private func setupSpinner() {
+        view.addSubview(spinner)
+        spinner.center = view.center
+        spinner.hidesWhenStopped = true
     }
     private func configureCollectionViewLayout() {
         guard let layout = collectionView.collectionViewLayout as? UICollectionViewFlowLayout else { return }
@@ -103,10 +109,48 @@ class HomeVC: UIViewController {
         let padding: CGFloat = 21
         let totalPadding: CGFloat = padding * (itemsPerRow - 1)
         let individualItemWidth: CGFloat = max((collectionView.bounds.width - totalPadding) / itemsPerRow, 0)
-        let individualItemHeight: CGFloat = individualItemWidth * 1.66 // Örneğin, genişliğin 1.5 katı
+        let individualItemHeight: CGFloat = individualItemWidth * 1.66
         layout.itemSize = CGSize(width: individualItemWidth, height: individualItemHeight)
         layout.minimumLineSpacing = padding
         layout.minimumInteritemSpacing = padding
+    }
+    func scrollViewDidScroll(_ scrollView: UIScrollView) {
+        let offsetY = scrollView.contentOffset.y
+        let contentHeight = scrollView.contentSize.height
+        let frameHeight = scrollView.frame.size.height
+        
+        if offsetY > contentHeight - frameHeight - (frameHeight / 4) {
+            loadMoreCars()
+        }
+    }
+    
+    private func loadMoreCars() {
+        if viewModel.hasMoreCarsToLoad {
+            viewModel.loadMoreCars() {
+                self.collectionView.reloadData()
+            }
+        }
+    }
+    private func loadAllCars() {
+        spinner.startAnimating()
+        viewModel.loadAllCars() {
+            self.spinner.stopAnimating()
+            self.collectionView.reloadData()
+        }
+    }
+    private func setupNoResultLabel() {
+        noResultLabel.text = "No Result"
+        noResultLabel.textAlignment = .center
+        noResultLabel.isHidden = true
+        view.addSubview(noResultLabel)
+        noResultLabel.snp.makeConstraints { make in
+            make.center.equalToSuperview()
+            make.left.right.equalTo(view.safeAreaLayoutGuide).inset(20)
+        }
+    }
+    
+    private func updateNoResultLabel() {
+        noResultLabel.isHidden = !viewModel.cars.isEmpty
     }
     
     @objc func selectFilterButtonTapped() {
@@ -119,7 +163,9 @@ class HomeVC: UIViewController {
 extension HomeVC: UISearchBarDelegate {
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         if let query = searchBar.text {
+            spinner.startAnimating()
             viewModel.performSearch(with: query) {
+                self.spinner.stopAnimating()
                 self.collectionView.reloadData()
             }
         }
@@ -128,6 +174,7 @@ extension HomeVC: UISearchBarDelegate {
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         viewModel.performSearch(with: searchText) {
+            self.updateNoResultLabel()
             self.collectionView.reloadData()
         }
     }
@@ -143,10 +190,7 @@ extension HomeVC : UICollectionViewDataSource, UICollectionViewDelegate {
             return UICollectionViewCell()
         }
         let car = viewModel.cars[indexPath.row]
-        
-        // Favori durumunu kontrol et
         let isFavorite = favoritesViewModel.isCarFavorite(carId: car.id ?? "")
-        
         cell.delegate = self
         cell.configure(with: car, isFavorite: isFavorite)
         
@@ -158,25 +202,21 @@ extension HomeVC : UICollectionViewDataSource, UICollectionViewDelegate {
         let detailVC = CarDetailVC()
         let carDetailViewModel = CarDetailViewModel(car: selectedCar)
         detailVC.viewModel = carDetailViewModel
-        // containerView ve detay görünümünü oluştur
         containerView = UIView(frame: self.view.bounds)
         containerView?.backgroundColor = UIColor.black.withAlphaComponent(0.5)
         guard let containerView = containerView else { return }
         self.view.addSubview(containerView)
-        // CarDetailVC görünümünü containerView'a ekle
         addChild(detailVC)
         containerView.addSubview(detailVC.view)
         detailVC.view.frame = containerView.bounds
         detailVC.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         detailVC.didMove(toParent: self)
         
-        // Geri dönüş işlemi için bir closure veya delegate tanımla
         detailVC.onClose = { [weak self] in
             containerView.removeFromSuperview()
             detailVC.view.removeFromSuperview()
             detailVC.removeFromParent()
         }
-        
     }
     @objc func favoriteUpdate() {
         favoritesViewModel.fetchFavorites()
@@ -184,8 +224,7 @@ extension HomeVC : UICollectionViewDataSource, UICollectionViewDelegate {
     }
     @objc private func favoriteStatusChanged(_ notification: Notification) {
         guard let updatedCarId = notification.userInfo?["carId"] as? String else { return }
-
-        // Bul ve güncelle
+        
         for (index, car) in viewModel.cars.enumerated() {
             if car.id == updatedCarId {
                 let indexPath = IndexPath(item: index, section: 0)
@@ -195,24 +234,20 @@ extension HomeVC : UICollectionViewDataSource, UICollectionViewDelegate {
             }
         }
     }
-
-    
-    
 }
 extension HomeVC: FilterViewControllerDelegate {
     func didApplyFilters(brand: String?, model: String?, sortOption: SortOption?) {
         viewModel.filterCars(brand: brand, model: model, sortOption: sortOption)
         
         print("Filtrelenmiş araç sayısı: \(viewModel.cars.count)")
-        
         DispatchQueue.main.async {
+            self.updateNoResultLabel()
             self.collectionView.reloadData()
         }
     }
 }
 extension HomeVC: HomeCellDelegate {
     func addToCartButtonTapped(for car: Car) {
-        // Assuming 'saveCarToCart' is a method you will implement in CoreDataManager
         CoreDataManager.shared.saveCarToCart(data: car)
         print("Car added to cart")
         NotificationCenter.default.post(name: NSNotification.Name("BasketUpdated"), object: nil)
@@ -223,7 +258,7 @@ extension HomeVC: HomeCellDelegate {
             CoreDataManager.shared.saveCarsToCoreData(data: car)
             print("Car added to favorites")
         } else {
-            if let id = Int(car.id!) { // Convert to Int, handle non-convertible cases
+            if let id = Int(car.id!) {
                 CoreDataManager.shared.removeCarItemFromCoreData(id: id)
                 print("Car removed from favorites")
             }

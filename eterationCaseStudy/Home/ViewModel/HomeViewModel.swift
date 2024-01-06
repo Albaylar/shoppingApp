@@ -9,23 +9,29 @@ import Foundation
 
 
 
-class HomeViewModel {
+final class HomeViewModel {
     var allCars: [Car] = [] // Tüm araçların listesi
     var cars: [Car] = [] // Filtrelenmiş veya gösterilecek araçların listesi
     
     private let carService = CarService.shared
     private let debouncer = Debouncer(delay: 0.5)
     
+    private var currentPage = 1
+        private var isFetchingMoreCars = false
+        var hasMoreCarsToLoad: Bool = true
+    
     func loadAllCars(completion: @escaping () -> Void) {
         carService.getCars { [weak self] cars in
-            self?.allCars = cars // API'den dönen tüm araçlar
-            self?.cars = cars    // Başlangıçta tüm araçları göstermek için
-            
+            self?.allCars = cars
+            self?.cars = Array(cars.prefix(4))
+            self?.currentPage = 1
+            self?.hasMoreCarsToLoad = cars.count > 4
             completion()
         } failure: { error in
             print(error)
         }
     }
+
     
     func performSearch(with query: String, completion: @escaping () -> Void) {
         debouncer.debounce { [weak self] in
@@ -44,11 +50,29 @@ class HomeViewModel {
             }
         }
     }
+    func loadMoreCars(completion: @escaping () -> Void) {
+        guard hasMoreCarsToLoad && !isFetchingMoreCars else {
+            return
+        }
+
+        isFetchingMoreCars = true
+        currentPage += 1
+        let nextCars = Array(allCars.prefix(4 * currentPage))
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { // Bir saniye gecikme ile simülasyon yapılır
+            self.cars = nextCars
+            self.hasMoreCarsToLoad = self.allCars.count > nextCars.count
+            self.isFetchingMoreCars = false
+            completion()
+        }
+    }
+
+
+
     
     func filterCars(brand: String?, model: String?, sortOption: SortOption?) {
             cars = allCars.filter { car in
-                var matchesBrand = brand == nil || brand!.isEmpty || car.brand?.lowercased() == brand!.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
-                var matchesModel = model == nil || model!.isEmpty || car.model?.lowercased() == model!.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+                let matchesBrand = brand == nil || brand!.isEmpty || car.brand?.lowercased() == brand!.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+                let matchesModel = model == nil || model!.isEmpty || car.model?.lowercased() == model!.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
                 return matchesBrand && matchesModel
             }
             

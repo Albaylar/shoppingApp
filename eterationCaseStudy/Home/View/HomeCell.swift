@@ -16,7 +16,7 @@ protocol HomeCellDelegate: AnyObject {
 
 }
 
-class HomeCell: UICollectionViewCell {
+final class HomeCell: UICollectionViewCell {
     weak var delegate: HomeCellDelegate?
     var car: Car?
     let homeViewModel = HomeViewModel()
@@ -42,7 +42,7 @@ class HomeCell: UICollectionViewCell {
     }
     
     private func setupViews() {
-        // ImageView Ayarları
+        
         contentView.addSubview(imageView)
         imageView.backgroundColor = .lightGray
         imageView.contentMode = .scaleAspectFill
@@ -50,7 +50,7 @@ class HomeCell: UICollectionViewCell {
         imageView.snp.makeConstraints { make in
             make.top.equalToSuperview().offset(10)
             make.left.right.equalToSuperview().inset(10)
-            make.height.equalTo(150)
+            make.height.equalTo(imageView.snp.width).multipliedBy(0.9) 
         }
         imageView.addSubview(favoriteButton)
         favoriteButton.setImage(UIImage(systemName: "star"), for: .normal)
@@ -60,10 +60,9 @@ class HomeCell: UICollectionViewCell {
         favoriteButton.snp.makeConstraints { make in
             make.top.equalToSuperview().offset(6)
             make.right.equalTo(imageView.snp.right).inset(6)
-            make.width.height.equalTo(24)
+            make.height.equalTo(24)
         }
-        
-        // Price Label Ayarları
+       
         contentView.addSubview(priceLabel)
         priceLabel.text = "17.00 $"
         priceLabel.textAlignment = .left
@@ -73,7 +72,7 @@ class HomeCell: UICollectionViewCell {
             make.left.right.equalToSuperview().inset(10)
         }
         
-        // Title Label Ayarları
+        // Title Label Set
         contentView.addSubview(titleLabel)
         titleLabel.text =  "iphone 14 promax"
         titleLabel.textAlignment = .left
@@ -83,7 +82,7 @@ class HomeCell: UICollectionViewCell {
             make.left.right.equalToSuperview().inset(10)
         }
         
-        // Add to Cart Button Ayarları
+        // Add to Cart Button set
         contentView.addSubview(addToCartButton)
         addToCartButton.setTitle("Add to Cart", for: .normal)
         addToCartButton.addTarget(self, action: #selector(addChartButtonTapped), for: .touchUpInside)
@@ -131,7 +130,6 @@ class HomeCell: UICollectionViewCell {
         }
     @objc func addChartButtonTapped() {
         if let car = car {
-            print(car)
             delegate?.addToCartButtonTapped(for: car)
         }
     }

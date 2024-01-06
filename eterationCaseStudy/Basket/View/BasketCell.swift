@@ -8,9 +8,7 @@
 import UIKit
 import SnapKit
 
-
-
-class BasketCell: UITableViewCell {
+final class BasketCell: UITableViewCell {
     
     let productNameLabel = UILabel()
     let productPriceLabel = UILabel()
@@ -107,7 +105,6 @@ class BasketCell: UITableViewCell {
                 }
             }
         }
-    
     func configure(with item: CartItem) {
         productNameLabel.text = item.productName
         productPriceLabel.text = "\(item.price)₺"

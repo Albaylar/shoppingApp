@@ -74,7 +74,6 @@ class CarDetailVC: UIViewController {
             
         }
         
-        // carImageView Yapılandırması
         carImageView.contentMode = .scaleToFill
         view.addSubview(carImageView)
         carImageView.snp.makeConstraints { make in
@@ -164,11 +163,9 @@ class CarDetailVC: UIViewController {
         }
         
         if let formattedPrice = viewModel?.formattedPrice {
-            // Check if formattedPrice already contains "Price: "
             if formattedPrice.contains("Price: ") {
                 priceLabel.text = formattedPrice
             } else {
-                // If not, format and display with "Price: " and currency symbol
                 let priceText = NSMutableAttributedString(string: "Price: ", attributes: [
                     NSAttributedString.Key.foregroundColor: UIColor.blue,
                     NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18)
@@ -188,10 +185,9 @@ class CarDetailVC: UIViewController {
     
     @objc private func addChartButtonTapped(){
         if let car = viewModel?.car {
-            CoreDataManager.shared.saveCarToCart(data: car) // Sepete ekleme/güncelleme işlemi
+            CoreDataManager.shared.saveCarToCart(data: car) 
             print("Car added to cart from details")
-            // Kullanıcıya bilgi vermek için uyarı mesajı veya toast mesajı eklenebilir.
-            // Örnek: "Araba başarıyla sepete eklendi."
+            NotificationCenter.default.post(name: NSNotification.Name("BasketUpdated"), object: nil)
         }
     }
 

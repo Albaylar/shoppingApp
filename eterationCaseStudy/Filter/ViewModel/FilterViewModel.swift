@@ -11,7 +11,7 @@ enum SortOption {
     case dateAscending, dateDescending, priceAscending, priceDescending
 }
 
-class FilterViewModel {
+final class FilterViewModel {
     var brands: [String] = []
     var models: [String] = []
     var allCars: [Car] = []

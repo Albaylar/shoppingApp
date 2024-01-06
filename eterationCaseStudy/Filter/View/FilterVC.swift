@@ -12,7 +12,7 @@ protocol FilterViewControllerDelegate: AnyObject {
     func didApplyFilters(brand: String?, model: String?,sortOption: SortOption?)
 }
 
-class FilterVC: UIViewController {
+final class FilterVC: UIViewController {
     
     private let sortByLabel = UILabel()
     private let brandsSearchBar = UISearchBar()
@@ -54,21 +54,20 @@ class FilterVC: UIViewController {
         closeImage.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide).offset(26)
             make.left.equalToSuperview().inset(23)
-            make.height.width.equalTo(20) // Genişlik de eklenmeli
+            make.height.width.equalTo(20)
         }
         
         // Top Label
         let topLabel = UILabel()
         topLabel.text = "Filter"
-        topLabel.font = .systemFont(ofSize: 20)
+        topLabel.font = UIFont.montserratBold(size: 20)
         view.addSubview(topLabel)
         topLabel.snp.makeConstraints { make in
             make.top.equalTo(view.safeAreaLayoutGuide).offset(23)
-            make.centerX.equalToSuperview() // Merkezde olması için
+            make.centerX.equalToSuperview()
             make.height.equalTo(24)
         }
         
-        // Line View
         let lineView = UIView()
         lineView.backgroundColor = .black
         lineView.layer.shadowColor = UIColor.black.cgColor
@@ -83,7 +82,7 @@ class FilterVC: UIViewController {
         }
         
         sortByLabel.text = "Sort By"
-        sortByLabel.font = .systemFont(ofSize: 16)
+        sortByLabel.font = .montserratRegular(size: 12)
         view.addSubview(sortByLabel)
         sortByLabel.snp.makeConstraints { make in
             make.top.equalTo(lineView.snp.bottom).offset(16)
@@ -102,7 +101,6 @@ class FilterVC: UIViewController {
             make.left.equalToSuperview().inset(16)
             make.right.equalToSuperview().inset(28)
         }
-        // Sort seçeneklerini stack view'e ekleyin
         for option in sortOptions {
             let button = createRadioButtonWithTitle(option)
             sortButtons.append(button)
@@ -114,7 +112,7 @@ class FilterVC: UIViewController {
         lineView2.snp.makeConstraints { make in
             make.top.equalTo(sortByStackView.snp.bottom).offset(35)
             make.right.left.equalToSuperview().inset(15)
-            make.height.equalTo(3.05)
+            make.height.equalTo(1.5)
         }
         
         let brandNameLabel = UILabel()
@@ -126,7 +124,6 @@ class FilterVC: UIViewController {
             make.left.equalToSuperview().inset(18)
             make.height.equalTo(15)
         }
-        // Brands Search Bar
         brandsSearchBar.placeholder = "Search Brand"
         brandsSearchBar.backgroundImage = UIImage()
         view.addSubview(brandsSearchBar)
@@ -135,13 +132,12 @@ class FilterVC: UIViewController {
             make.right.left.equalToSuperview().inset(36)
             make.height.equalTo(40)
         }
-        // Brands ScrollView
         let brandsScrollView = UIScrollView()
         view.addSubview(brandsScrollView)
         brandsScrollView.snp.makeConstraints { make in
             make.top.equalTo(brandsSearchBar.snp.bottom).offset(15)
             make.left.right.equalToSuperview().inset(33)
-            make.height.equalTo(95) // Sabit yükseklik
+            make.height.equalTo(95)
         }
         brandsStackView.axis = .vertical
         brandsStackView.alignment = .fill
@@ -159,7 +155,7 @@ class FilterVC: UIViewController {
         lineView3.snp.makeConstraints { make in
             make.top.equalTo(brandsScrollView.snp.bottom).offset(31)
             make.right.left.equalToSuperview().inset(15)
-            make.height.equalTo(3.05)
+            make.height.equalTo(1.5)
         }
         let modelNameLabel = UILabel()
         modelNameLabel.text = "Model"
@@ -175,20 +171,18 @@ class FilterVC: UIViewController {
         modelsSearchBar.backgroundImage = UIImage()
         view.addSubview(modelsSearchBar)
         modelsSearchBar.snp.makeConstraints { make in
-            make.top.equalTo(modelNameLabel.snp.bottom).offset(24) // brandsTableView altında yer almalı
+            make.top.equalTo(modelNameLabel.snp.bottom).offset(24) 
             make.right.left.equalToSuperview().inset(36)
             make.height.equalTo(40)
         }
         
-        // modelsScrollView Constraints
         let modelsScrollView = UIScrollView()
         view.addSubview(modelsScrollView)
         modelsScrollView.snp.makeConstraints { make in
             make.top.equalTo(modelsSearchBar.snp.bottom).offset(23)
             make.left.right.equalToSuperview().inset(33)
-            make.height.equalTo(95) // Yüksekliği ayarlayabilirsiniz
+            make.height.equalTo(95)
         }
-        // modelsStackView Constraints
         modelsStackView.axis = .vertical
         modelsStackView.alignment = .fill
         modelsStackView.distribution = .fillEqually
@@ -198,11 +192,10 @@ class FilterVC: UIViewController {
         modelsStackView.snp.makeConstraints { make in
             make.top.bottom.equalToSuperview()
             make.leading.trailing.equalToSuperview()
-            make.width.equalTo(modelsScrollView) // Genişliği modelsScrollView ile eşitler
-            // Yükseklik constraint'ini ayarlamayın, içeriğe bağlı olarak değişmelidir
+            make.width.equalTo(modelsScrollView)
         }
-        applyButton.setTitle("Apply Filters", for: .normal)
-        applyButton.backgroundColor = .blue
+        applyButton.setTitle("Primary", for: .normal)
+        applyButton.backgroundColor = UIColor(red: 0.166, green: 0.349, blue: 0.996, alpha: 1)
         applyButton.addTarget(self, action: #selector(applyButtonTapped), for: .touchUpInside)
         view.addSubview(applyButton)
         applyButton.snp.makeConstraints { make in
@@ -224,12 +217,10 @@ class FilterVC: UIViewController {
         return button
     }
     @objc private func radioButtonTapped(_ sender: UIButton) {
-        // Önce tüm butonları deselect yapın
         for button in sortButtons {
             button.isSelected = false
         }
         
-        // Ardından tıklanan butonu select yapın
         sender.isSelected = true
     }
     private func createCheckboxButtonWithTitle(_ title: String) -> UIButton {

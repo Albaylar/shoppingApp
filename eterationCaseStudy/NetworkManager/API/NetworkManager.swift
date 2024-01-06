@@ -43,7 +43,6 @@ final class NetworkManager {
                 guard let data = response.data, let model = try? JSONDecoder().decode(T.self, from: data) else { return }
                 completion(.success(model))
                 
-                
             default:
                 completion(.messageFailure(ErrorMessage(error: "Server Error")))
             }

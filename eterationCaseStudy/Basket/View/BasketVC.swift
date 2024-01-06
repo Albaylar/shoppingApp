@@ -9,41 +9,25 @@ import UIKit
 import SnapKit
 import CoreData
 
-class BasketVC: UIViewController {
+final class BasketVC: UIViewController {
     var basketItems: [CartItem] = []
     let tableView = UITableView()
     let totalPriceLabel = UILabel()
+    private let emptyBasketLabel = UILabel()
     
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
         setupUI()
         NotificationCenter.default.addObserver(self, selector: #selector(loadBasketItems), name: NSNotification.Name("BasketUpdated"), object: nil)
+        setupEmptyBasketLabel()
     }
     override func viewWillAppear(_ animated: Bool) {
         loadBasketItems()
-    }
-    
-    func addToBasket(car: Car) {
-        guard let priceString = car.price, let price = Double(priceString) else {
-            print("Fiyat dönüştürülemedi")
-            return
-        }
+        updateTotalPriceAndQuantity()
 
-        if let index = basketItems.firstIndex(where: { $0.productId == car.id }) {
-            // Eğer ürün zaten sepetteyse, miktarını artır
-            basketItems[index].quantity += 1
-        } else {
-            // Eğer ürün sepette değilse, yeni ürün ekle
-            let cartItem = CartItem(productId: car.id ?? "", productName: car.name ?? "", quantity: 1, price: price)
-            basketItems.append(cartItem)
-        }
-
-        tableView.reloadData()
-        updateTotalPriceAndQuantity()  // Toplam fiyatı güncelle
     }
 
-    
     func setupUI() {
         view.backgroundColor = .white
         let topView = UIView()
@@ -68,6 +52,7 @@ class BasketVC: UIViewController {
         tableView.dataSource = self
         tableView.delegate = self
         tableView.separatorStyle = .none
+        tableView.allowsSelection = false
         view.addSubview(tableView)
         tableView.snp.makeConstraints { make in
             make.top.equalTo(topView.snp.bottom).offset(17)
@@ -101,19 +86,48 @@ class BasketVC: UIViewController {
             make.width.equalTo(182)
         }
     }
+    private func setupEmptyBasketLabel() {
+            emptyBasketLabel.text = "Sepetinizde ürün bulunmamaktadır"
+            emptyBasketLabel.textAlignment = .center
+            emptyBasketLabel.isHidden = true 
+            emptyBasketLabel.layer.zPosition = 1
+            view.addSubview(emptyBasketLabel)
+            emptyBasketLabel.snp.makeConstraints { make in
+                make.center.equalToSuperview()
+                make.left.right.equalToSuperview().inset(20)
+            }
+        }
     
     @objc func loadBasketItems() {
-        basketItems = CoreDataManager.shared.fetchBasketItems().map { CartItem(productId: $0.id ?? "", productName: $0.name ?? "", quantity: 1, price: Double($0.price ?? "") ?? 0.0) }
+        let fetchedItems = CoreDataManager.shared.fetchBasketItems()
+        var groupedItems = [String: CartItem]()
+        
+        for entity in fetchedItems {
+            guard let id = entity.id, let name = entity.name, let priceString = entity.price, let price = Double(priceString) else { continue }
+            
+            if let existingItem = groupedItems[id] {
+                let updatedQuantity = existingItem.quantity + 1
+                groupedItems[id] = CartItem(productId: id, productName: name, quantity: updatedQuantity, price: price)
+            } else {
+                groupedItems[id] = CartItem(productId: id, productName: name, quantity: 1, price: price)
+            }
+        }
+        
+        basketItems = Array(groupedItems.values)
         tableView.reloadData()
+        updateEmptyBasketLabelVisibility()
     }
+
+    private func updateEmptyBasketLabelVisibility() {
+            emptyBasketLabel.isHidden = !basketItems.isEmpty
+        }
+
     func updateTotalPriceAndQuantity() {
         var totalPrice = 0.0
         
         for item in basketItems {
             totalPrice += item.price * Double(item.quantity)
         }
-        
-        // Attributed String kullanarak "Total:" kısmını mavi renk ve normal fontla, fiyat kısmını ise bold fontla göster
         let attributedString = NSMutableAttributedString(
             string: "Total: ",
             attributes: [
@@ -133,12 +147,7 @@ class BasketVC: UIViewController {
         attributedString.append(priceString)
         totalPriceLabel.attributedText = attributedString
 
-        // Post notification with the updated count
-        NotificationCenter.default.post(name: .BasketItemCountUpdated, object: nil, userInfo: ["basketItemCount": basketItems.count])
     }
-
-
-    
 }
 extension BasketVC: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -153,13 +162,10 @@ extension BasketVC: UITableViewDelegate, UITableViewDataSource {
         
         let cartItem = basketItems[indexPath.row]
         cell.configure(with: cartItem)
-        // Miktar değiştiğinde tetiklenecek callback
         cell.onQuantityChanged = { [weak self] newQuantity in
             self?.basketItems[indexPath.row].quantity = newQuantity
-            // Burada sepetin toplam fiyatını ve miktarını güncelleyebilirsiniz.
             self?.updateTotalPriceAndQuantity()
         }
-        
         cell.onRemoveProduct = { [weak self] in
             guard let strongSelf = self else { return }
             
@@ -168,20 +174,17 @@ extension BasketVC: UITableViewDelegate, UITableViewDataSource {
             strongSelf.tableView.deleteRows(at: [indexPath], with: .fade)
             CoreDataManager.shared.removeCarFromCart(id: productId)
             NotificationCenter.default.post(name: NSNotification.Name("BasketUpdated"), object: nil)
-
-            // Toplam fiyatı güncelle
             strongSelf.updateTotalPriceAndQuantity()
+            self?.loadBasketItems()
+
         }
-        
         return cell
     }
-    
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 50
     }
     
 }
-
 extension Notification.Name {
     static let BasketItemCountUpdated = Notification.Name("BasketItemCountUpdated")
 }

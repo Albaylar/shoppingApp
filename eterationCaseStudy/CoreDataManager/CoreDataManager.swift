@@ -7,13 +7,19 @@
 import UIKit
 import CoreData
 
-import UIKit
-import CoreData
 
 final class CoreDataManager {
     
     //MARK: - Properties
     static let shared = CoreDataManager()
+        private let context: NSManagedObjectContext
+
+        private init() {
+            guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else {
+                fatalError("AppDelegate not accessible.")
+            }
+            context = appDelegate.persistentContainer.viewContext
+        }
     
     //MARK: - Functions
     
@@ -99,48 +105,46 @@ final class CoreDataManager {
     }
     
     // Sepett
-    func saveCarToCart(data: Car?) {
-        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else { return }
+    func saveCarToCart(data: Car?, quantity: Int = 1) {
+        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate,
+              let carData = data else { return }
         let managedObjectContext = appDelegate.persistentContainer.viewContext
         
-        if let entity = NSEntityDescription.entity(forEntityName: "NewEntity", in: managedObjectContext),
-           let basketItem = NSManagedObject(entity: entity, insertInto: managedObjectContext) as? NewEntity {
-            
-            basketItem.name = data?.name
-            basketItem.price = data?.price
-            basketItem.id = data?.id 
-            
-            do {
-                try managedObjectContext.save()
-                print("Car saved to cart")
-            } catch {
-                print("Error saving car to cart: \(error.localizedDescription)")
-            }
+        let basketItem = NewEntity(context: managedObjectContext)
+        basketItem.name = carData.name
+        basketItem.price = carData.price
+        basketItem.id = carData.id
+        basketItem.quantity = Int64(quantity)
+        
+        do {
+            try managedObjectContext.save()
+            print("Car saved to cart with quantity \(quantity)")
+        } catch {
+            print("Error saving car to cart: \(error.localizedDescription)")
         }
     }
+
     func removeCarFromCart(id: String?) {
         guard let carId = id, let appDelegate = UIApplication.shared.delegate as? AppDelegate else {
             print("Invalid ID or AppDelegate not found")
             return
         }
         let managedObjectContext = appDelegate.persistentContainer.viewContext
-        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "NewEntity")
+        let fetchRequest: NSFetchRequest<NewEntity> = NewEntity.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "id == %@", carId)
 
         do {
             let fetchedResults = try managedObjectContext.fetch(fetchRequest)
-            if let entityToDelete = fetchedResults.first as? NSManagedObject {
-                managedObjectContext.delete(entityToDelete)
-                try managedObjectContext.save()
-                print("Car removed from cart")
-            } else {
-                print("Car not found in cart")
+            for entity in fetchedResults {
+                managedObjectContext.delete(entity)
             }
+            try managedObjectContext.save()
+            print("All cars with ID \(carId) removed from cart")
         } catch {
             print("Error removing car from cart: \(error.localizedDescription)")
         }
     }
-    
+
 
     func fetchBasketItems() -> [NewEntity] {
         var coreDataItems = [NewEntity]()
@@ -155,6 +159,7 @@ final class CoreDataManager {
         }
         return coreDataItems
     }
+    
 
 
 

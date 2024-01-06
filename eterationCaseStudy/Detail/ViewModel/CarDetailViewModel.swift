@@ -67,16 +67,14 @@ class CarDetailViewModel {
     func updateFavoriteStatus(isFavorite: Bool) {
         guard let id = car.id, let idInt = Int(id) else { return }
         if isFavorite {
-            // Add to favorites
             CoreDataManager.shared.saveCarsToCoreData(data: car)
         } else {
-            // Remove from favorites
             CoreDataManager.shared.removeCarItemFromCoreData(id: idInt)
         }
 
-        // Update the favorite status
+        
         onFavoriteStatusChanged?(isFavorite)
-        self.isFavorite = isFavorite // Update isFavorite here
+        self.isFavorite = isFavorite
         NotificationCenter.default.post(name: NSNotification.Name("FavoritesUpdatedAgain"), object: nil, userInfo: ["carId": car.id])
 
     }

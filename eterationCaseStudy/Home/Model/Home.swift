@@ -14,6 +14,5 @@ struct Car: Codable {
     let id: String?
     
     
-
 }
 typealias Cars = [Car]

@@ -29,6 +29,23 @@ final class eterationCaseStudyUITests: XCTestCase {
 
         // Use XCTAssert and related functions to verify your tests produce the correct results.
     }
+    func testAddToCart() throws {
+        let app = XCUIApplication()
+        app.launch()
+
+        // Ürün detay sayfasına gidiliyor
+        let productDetailButton = app.buttons["starView"] // Daha açıklayıcı bir isimlendirme kullanılabilir
+        XCTAssertTrue(productDetailButton.exists, "Ürün detay butonu mevcut değil.")
+        productDetailButton.tap()
+        
+        // "Sepete Ekle" butonuna tıklanıyor
+        let addToCartButton = app.buttons["addToCartButton"]
+        XCTAssertTrue(addToCartButton.exists, "Sepete Ekle butonu mevcut değil.")
+        addToCartButton.tap()
+        
+        // Sepete eklenen ürünün kontrolü (örnek olarak)
+        // Burada 'sepetOnayMesaji' gibi bir elementin varlığını kontrol edebilirsiniz.
+    }
 
     func testLaunchPerformance() throws {
         if #available(macOS 10.15, iOS 13.0, tvOS 13.0, watchOS 7.0, *) {

@@ -9,8 +9,9 @@ import UIKit
 class FavoriteVC: UIViewController {
     
     private let tableView = UITableView()
-    private var favviewModel = FavoriteViewModel() 
-
+    private var favviewModel = FavoriteViewModel()
+    let noFavoritesLabel = UILabel()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
@@ -18,11 +19,8 @@ class FavoriteVC: UIViewController {
     }
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        favviewModel.fetchFavorites()
-        tableView.reloadData()
+        updateFavorites()
     }
-
-    
     private func setupUI() {
         view.backgroundColor = .white
         let topView = UIView()
@@ -43,22 +41,41 @@ class FavoriteVC: UIViewController {
             make.left.equalTo(topView.snp.left).inset(16)
             make.bottom.equalTo(topView.snp.bottom).inset(14)
         }
-        // TableView ayarları
+        
+        noFavoritesLabel.text = "Favorilenmiş ürün yoktur"
+        noFavoritesLabel.layer.zPosition = 1
+        noFavoritesLabel.textAlignment = .center
+        noFavoritesLabel.isHidden = true
+        view.addSubview(noFavoritesLabel)
+        noFavoritesLabel.snp.makeConstraints { make in
+            make.center.equalToSuperview()
+            make.left.right.equalToSuperview().inset(20)
+        }
+        
         tableView.register(UITableViewCell.self, forCellReuseIdentifier: "Cell")
         tableView.dataSource = self
+        tableView.delegate = self
+        tableView.allowsSelection = false
         view.addSubview(tableView)
         
-        // SnapKit ile constraint'leri ayarla
         tableView.snp.makeConstraints { make in
             make.top.equalTo(topView.snp.bottom).offset(10)
             make.right.left.bottom.equalToSuperview()
         }
     }
     @objc func favoritesUpdated() {
-        favviewModel.fetchFavorites()
-        tableView.reloadData()
+        updateFavorites()
     }
     
+    private func updateFavorites() {
+        favviewModel.fetchFavorites()
+        tableView.reloadData()
+        checkForEmptyFavorites()
+    }
+    
+    private func checkForEmptyFavorites() {
+        noFavoritesLabel.isHidden = !favviewModel.favoriteCars.isEmpty
+    }
 }
 
 extension FavoriteVC: UITableViewDataSource,UITableViewDelegate {
@@ -73,14 +90,11 @@ extension FavoriteVC: UITableViewDataSource,UITableViewDelegate {
         cell.textLabel?.textAlignment = .left
         return cell
     }
-    
-
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
             
             let favoriteCar = favviewModel.favoriteCars[indexPath.row]
             favviewModel.deleteFavoriteCar(withId: favoriteCar.id)
-            
             favviewModel.favoriteCars.remove(at: indexPath.row)
             tableView.deleteRows(at: [indexPath], with: .fade)
             
