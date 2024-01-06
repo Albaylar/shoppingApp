@@ -6,12 +6,7 @@
 //
 
 import Foundation
-enum SortOption {
-    case priceAscending
-    case priceDescending
-    case dateAscending
-    case dateDescending
-}
+
 
 
 class HomeViewModel {
@@ -51,36 +46,34 @@ class HomeViewModel {
     }
     
     func filterCars(brand: String?, model: String?, sortOption: SortOption?) {
-            // Filtreleme işlemleri...
             cars = allCars.filter { car in
-                if let brand = brand?.lowercased().trimmingCharacters(in: .whitespacesAndNewlines),
-                   let model = model?.lowercased().trimmingCharacters(in: .whitespacesAndNewlines),
-                   !brand.isEmpty, !model.isEmpty {
-                    return car.brand?.lowercased() == brand && car.model?.lowercased() == model
-                } else if let brand = brand?.lowercased().trimmingCharacters(in: .whitespacesAndNewlines), !brand.isEmpty {
-                    return car.brand?.lowercased() == brand
-                } else if let model = model?.lowercased().trimmingCharacters(in: .whitespacesAndNewlines), !model.isEmpty {
-                    return car.model?.lowercased() == model
-                } else {
-                    return true
-                }
-                if let sortOption = sortOption {
-                        switch sortOption {
-                        case .priceAscending:
-                            cars.sort { (Double($0.price ?? "") ?? 0.0) < (Double($1.price ?? "") ?? 0.0) }
-                        case .priceDescending:
-                            cars.sort { (Double($0.price ?? "") ?? 0.0) > (Double($1.price ?? "") ?? 0.0) }
-                        case .dateAscending:
-                            print("")
-                        case .dateDescending:
-                            print("")
-                        }
-                    }
+                var matchesBrand = brand == nil || brand!.isEmpty || car.brand?.lowercased() == brand!.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+                var matchesModel = model == nil || model!.isEmpty || car.model?.lowercased() == model!.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+                return matchesBrand && matchesModel
             }
-
             
+            if let sortOption = sortOption {
+                switch sortOption {
+                case .priceAscending:
+                    cars.sort { (Double($0.price ?? "") ?? 0.0) < (Double($1.price ?? "") ?? 0.0) }
+                case .priceDescending:
+                    cars.sort { (Double($0.price ?? "") ?? 0.0) > (Double($1.price ?? "") ?? 0.0) }
+                case .dateAscending:
+                    cars.sort { parseDate($0.createdAt ?? "") ?? Date.distantPast < parseDate($1.createdAt ?? "") ?? Date.distantPast }
+                case .dateDescending:
+                    cars.sort { parseDate($0.createdAt ?? "") ?? Date.distantPast > parseDate($1.createdAt ?? "") ?? Date.distantPast }
+                }
+            }
         }
+    }
+
+func parseDate(_ dateString: String) -> Date? {
+    let dateFormatter = DateFormatter()
+    dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ" // Milisaniyeler için "SSS" eklendi
+    return dateFormatter.date(from: dateString)
 }
+
+
 
 
 

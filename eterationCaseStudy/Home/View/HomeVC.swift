@@ -215,7 +215,7 @@ extension HomeVC: FilterViewControllerDelegate {
 extension HomeVC: HomeCellDelegate {
     func addToCartButtonTapped(for car: Car) {
         // Assuming 'saveCarToCart' is a method you will implement in CoreDataManager
-        //CoreDataManager.shared.saveCarToCart(data: car)
+        CoreDataManager.shared.saveCarToCart(data: car)
         print("Car added to cart")
         NotificationCenter.default.post(name: NSNotification.Name("BasketUpdated"), object: nil)
     }

@@ -187,7 +187,11 @@ class CarDetailVC: UIViewController {
     }
     
     @objc private func addChartButtonTapped(){
-        
+        if let car = viewModel?.car {
+            CoreDataManager.shared.saveCarToCart(data: car)
+            print("Car added to cart from details")
+            // İsteğe bağlı olarak kullanıcıya bilgi mesajı gösterilebilir
+        }
     }
     @objc private func backButtonTapped() {
         onClose?()
@@ -198,7 +202,7 @@ class CarDetailVC: UIViewController {
             viewModel?.updateFavoriteStatus(isFavorite: !isFavorite)
         }
     }
-
+    
     private func updateFavoriteIcon(isFavorite: Bool) {
         let iconName = isFavorite ? "star.fill" : "star"
         starView.setImage(UIImage(systemName: iconName), for: .normal)

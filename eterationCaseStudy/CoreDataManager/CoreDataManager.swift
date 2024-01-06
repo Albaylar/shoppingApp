@@ -97,6 +97,41 @@ final class CoreDataManager {
             print("Deleting error: \(error)")
         }
     }
+    func saveCarToCart(data: Car?) {
+        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else { return }
+        let managedObjectContext = appDelegate.persistentContainer.viewContext
+        
+        if let entity = NSEntityDescription.entity(forEntityName: "NewEntity", in: managedObjectContext),
+           let basketItem = NSManagedObject(entity: entity, insertInto: managedObjectContext) as? NewEntity {
+            
+            basketItem.name = data?.name
+            basketItem.price = data?.price
+            basketItem.id = data?.id 
+            
+            do {
+                try managedObjectContext.save()
+                print("Car saved to cart")
+            } catch {
+                print("Error saving car to cart: \(error.localizedDescription)")
+            }
+        }
+    }
+    func fetchBasketItems() -> [NewEntity] {
+        var coreDataItems = [NewEntity]()
+        let appDelegate = UIApplication.shared.delegate as? AppDelegate
+        let managedObjectContext = appDelegate?.persistentContainer.viewContext
+        let fetchRequest = NSFetchRequest<NewEntity>(entityName: "NewEntity")
+        
+        do {
+            coreDataItems = try managedObjectContext!.fetch(fetchRequest)
+        } catch {
+            print("Fetching from Core Data failed: \(error)")
+        }
+        return coreDataItems
+    }
+
+
+
 }
 
 

@@ -12,7 +12,6 @@ protocol FilterViewControllerDelegate: AnyObject {
     func didApplyFilters(brand: String?, model: String?,sortOption: SortOption?)
 }
 
-
 class FilterVC: UIViewController {
     
     private let sortByLabel = UILabel()
@@ -247,7 +246,7 @@ class FilterVC: UIViewController {
     }
     @objc private func checkboxTapped(_ sender: UIButton) {
         sender.isSelected.toggle()
-        // Burada seçilen butonun durumuna göre işlemler yapabilirsiniz.
+        
     }
     
     @objc private func closeTapped() {
@@ -256,38 +255,28 @@ class FilterVC: UIViewController {
     @objc private func applyButtonTapped() {
         let selectedBrand = brandButtons.first(where: { $0.isSelected })?.title(for: .normal)
         let selectedModel = modelButtons.first(where: { $0.isSelected })?.title(for: .normal)
-        
-        // Determine the selected sort option
         let selectedSortOption = sortButtons.enumerated().first(where: { $1.isSelected })?.offset
         var sortOption: SortOption?
         if let selectedSortOption = selectedSortOption {
             switch selectedSortOption {
-            case 0: // Old to new
+            case 0:
                 sortOption = .dateAscending
-            case 1: // New to old
+            case 1:
                 sortOption = .dateDescending
-            case 2: // Price high to low
+            case 2:
                 sortOption = .priceDescending
-            case 3: // Price low to high
+            case 3:
                 sortOption = .priceAscending
             default:
                 break
             }
         }
-        
-        // Notify the delegate about the selected filters
         delegate?.didApplyFilters(brand: selectedBrand, model: selectedModel, sortOption: sortOption)
-        
-        // Dismiss the current view controller
         self.dismiss(animated: true, completion: nil)
     }
-    
     @objc private func sortOptionTapped(_ sender: UIButton) {
-        // İlk olarak tüm butonları deselect yapın
         sortButtons.forEach { $0.isSelected = false }
-        // Tıklanan butonu select yapın
         sender.isSelected = true
-        // Burada seçilen sort seçeneğini işleyin
     }
     private func updateUIWithFilters() {
         updateBrandButtons(with: viewModel.brands)
@@ -308,18 +297,15 @@ extension FilterVC : UISearchBarDelegate {
     }
     
     private func updateBrandButtons(with brands: [String]) {
-        // Mevcut butonları kaldır
         brandButtons.forEach { $0.removeFromSuperview() }
         brandButtons.removeAll()
         
-        // Yeni filtrelenmiş markalar için butonları oluştur
         for brand in brands {
             let button = createCheckboxButtonWithTitle(brand)
             brandButtons.append(button)
             brandsStackView.addArrangedSubview(button)
         }
     }
-    
     private func updateModelButtons(with models: [String]) {
         modelButtons.forEach { $0.removeFromSuperview() }
         modelButtons.removeAll()

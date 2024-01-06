@@ -17,10 +17,11 @@ class BasketVC: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .white
         setupUI()
+        loadBasketItems()
         NotificationCenter.default.addObserver(self, selector: #selector(loadBasketItems), name: NSNotification.Name("BasketUpdated"), object: nil)
-        DispatchQueue.main.async {
-            self.tableView.reloadData()
-        }
+//        DispatchQueue.main.async {
+//            self.tableView.reloadData()
+//        }
         
     }
     
@@ -67,33 +68,30 @@ class BasketVC: UIViewController {
         view.addSubview(tableView)
         tableView.snp.makeConstraints { make in
             make.top.equalTo(topView.snp.bottom).offset(17)
-            make.right.left.equalToSuperview().inset(15)
+            make.right.left.equalToSuperview().inset(25)
+            make.bottom.equalToSuperview().inset(140)
             
         }
     }
+
     @objc func loadBasketItems() {
-        guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else { return }
-        let managedContext = appDelegate.persistentContainer.viewContext
-        
-        let fetchRequest = NSFetchRequest<NSManagedObject>(entityName: "Basket")
-        
-        do {
-            let items = try managedContext.fetch(fetchRequest)
-            basketItems = items.map { item in
-                // Burada CartItem nesnelerini oluşturun
-                CartItem(productId: item.value(forKey: "productId") as? String ?? "",
-                         productName: item.value(forKey: "productName") as? String ?? "",
-                         quantity: item.value(forKey: "quantity") as? Int ?? 1,
-                         price: item.value(forKey: "price") as? Double ?? 0.0)
-            }
-            print(basketItems)
-            DispatchQueue.main.async {
-                self.tableView.reloadData()
-            }
-        } catch let error as NSError {
-            print("Sepet öğelerini yüklerken hata oluştu: \(error), \(error.userInfo)")
-        }
+        basketItems = CoreDataManager.shared.fetchBasketItems().map { CartItem(productId: $0.id ?? "", productName: $0.name ?? "", quantity: 1, price: Double($0.price ?? "") ?? 0.0) }
+        tableView.reloadData()
     }
+    func updateTotalPriceAndQuantity() {
+            var totalQuantity = 0
+            var totalPrice = 0.0
+
+            for item in basketItems {
+                totalQuantity += item.quantity
+                totalPrice += item.price * Double(item.quantity)
+            }
+
+            // Bu örnekte, varsayalım ki toplam fiyat ve miktarı göstermek için iki labelınız var.
+//            totalQuantityLabel.text = "Toplam Miktar: \(totalQuantity)"
+//            totalPriceLabel.text = "Toplam Fiyat: \(totalPrice)₺"
+        }
+
 }
 extension BasketVC: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -101,15 +99,25 @@ extension BasketVC: UITableViewDelegate, UITableViewDataSource {
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "customCell", for: indexPath) as! BasketCell
-        let cartItem = basketItems[indexPath.row]
-        print(cartItem.price)
-        cell.configure(with: cartItem) // Car yerine CartItem geçirilmeli
-        
-        return cell
-    }
+            guard let cell = tableView.dequeueReusableCell(withIdentifier: "customCell", for: indexPath) as? BasketCell else {
+                return UITableViewCell()
+            }
+            
+            let cartItem = basketItems[indexPath.row]
+            cell.configure(with: cartItem)
+            
+            // Miktar değiştiğinde tetiklenecek callback
+            cell.onQuantityChanged = { [weak self] newQuantity in
+                self?.basketItems[indexPath.row].quantity = newQuantity
+                // Burada sepetin toplam fiyatını ve miktarını güncelleyebilirsiniz.
+                self?.updateTotalPriceAndQuantity()
+            }
+            
+            return cell
+        }
+
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 300 // Örnek yükseklik değeri
+        return 50 
     }
     
 }
