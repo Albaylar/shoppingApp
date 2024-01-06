@@ -60,11 +60,10 @@ class CarDetailVC: UIViewController {
             make.top.bottom.equalToSuperview().inset(15)
             make.height.equalTo(20)
             make.width.equalTo(21.67)
-            
-            
         }
         topLabel.textAlignment = .center
         topLabel.textColor = .white
+        topLabel.font = .boldSystemFont(ofSize: 18)
         topLabel.numberOfLines = 0
         topView.addSubview(topLabel)
         topLabel.snp.makeConstraints { make in

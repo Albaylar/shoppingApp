@@ -42,7 +42,6 @@ final class FilterVC: UIViewController {
     }
     private func setupUI(){
         view.backgroundColor = .white
-        
         // Close Button Image
         let closeImage = UIImageView()
         closeImage.image = UIImage(named: "closeButton")
@@ -56,7 +55,6 @@ final class FilterVC: UIViewController {
             make.left.equalToSuperview().inset(23)
             make.height.width.equalTo(20)
         }
-        
         // Top Label
         let topLabel = UILabel()
         topLabel.text = "Filter"

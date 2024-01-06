@@ -27,7 +27,6 @@ final class BasketVC: UIViewController {
         updateTotalPriceAndQuantity()
 
     }
-
     func setupUI() {
         view.backgroundColor = .white
         let topView = UIView()
@@ -129,7 +128,7 @@ final class BasketVC: UIViewController {
             totalPrice += item.price * Double(item.quantity)
         }
         let attributedString = NSMutableAttributedString(
-            string: "Total: ",
+            string: "Price: ",
             attributes: [
                 NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18),
                 NSAttributedString.Key.foregroundColor: UIColor.blue
