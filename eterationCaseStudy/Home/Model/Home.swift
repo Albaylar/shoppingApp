@@ -13,6 +13,7 @@ struct Car: Codable {
     let price, description, model, brand: String?
     let id: String?
     
+    
 
 }
 typealias Cars = [Car]

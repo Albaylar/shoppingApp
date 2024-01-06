@@ -188,11 +188,13 @@ class CarDetailVC: UIViewController {
     
     @objc private func addChartButtonTapped(){
         if let car = viewModel?.car {
-            CoreDataManager.shared.saveCarToCart(data: car)
+            CoreDataManager.shared.saveCarToCart(data: car) // Sepete ekleme/güncelleme işlemi
             print("Car added to cart from details")
-            // İsteğe bağlı olarak kullanıcıya bilgi mesajı gösterilebilir
+            // Kullanıcıya bilgi vermek için uyarı mesajı veya toast mesajı eklenebilir.
+            // Örnek: "Araba başarıyla sepete eklendi."
         }
     }
+
     @objc private func backButtonTapped() {
         onClose?()
         
@@ -206,6 +208,7 @@ class CarDetailVC: UIViewController {
     private func updateFavoriteIcon(isFavorite: Bool) {
         let iconName = isFavorite ? "star.fill" : "star"
         starView.setImage(UIImage(systemName: iconName), for: .normal)
+        starView.tintColor = .systemYellow
     }
     
 }

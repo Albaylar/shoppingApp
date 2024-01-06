@@ -15,10 +15,8 @@ class FavoriteViewModel {
 
     var favoriteCars: [FavoriteCar] = []
     
-    
 
     func fetchFavorites() {
-        
         
         guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else { return }
         let managedContext = appDelegate.persistentContainer.viewContext

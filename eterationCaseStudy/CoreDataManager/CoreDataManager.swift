@@ -80,7 +80,7 @@ final class CoreDataManager {
                 try managedObjectContext?.save()
                 print("Removed from Core Data")
             } else {
-                print("Movie not found in Core Data")
+                print("Car not found in Core Data")
             }
         } catch let error {
             print("Removing from Core Data failed: \(error.localizedDescription)")
@@ -97,6 +97,8 @@ final class CoreDataManager {
             print("Deleting error: \(error)")
         }
     }
+    
+    // Sepett
     func saveCarToCart(data: Car?) {
         guard let appDelegate = UIApplication.shared.delegate as? AppDelegate else { return }
         let managedObjectContext = appDelegate.persistentContainer.viewContext
@@ -116,6 +118,30 @@ final class CoreDataManager {
             }
         }
     }
+    func removeCarFromCart(id: String?) {
+        guard let carId = id, let appDelegate = UIApplication.shared.delegate as? AppDelegate else {
+            print("Invalid ID or AppDelegate not found")
+            return
+        }
+        let managedObjectContext = appDelegate.persistentContainer.viewContext
+        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "NewEntity")
+        fetchRequest.predicate = NSPredicate(format: "id == %@", carId)
+
+        do {
+            let fetchedResults = try managedObjectContext.fetch(fetchRequest)
+            if let entityToDelete = fetchedResults.first as? NSManagedObject {
+                managedObjectContext.delete(entityToDelete)
+                try managedObjectContext.save()
+                print("Car removed from cart")
+            } else {
+                print("Car not found in cart")
+            }
+        } catch {
+            print("Error removing car from cart: \(error.localizedDescription)")
+        }
+    }
+    
+
     func fetchBasketItems() -> [NewEntity] {
         var coreDataItems = [NewEntity]()
         let appDelegate = UIApplication.shared.delegate as? AppDelegate

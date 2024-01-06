@@ -14,10 +14,14 @@ class FavoriteVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
-        favviewModel.fetchFavorites()
         NotificationCenter.default.addObserver(self, selector: #selector(favoritesUpdated), name: NSNotification.Name("FavoritesUpdated"), object: nil)
+    }
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        favviewModel.fetchFavorites()
         tableView.reloadData()
     }
+
     
     private func setupUI() {
         view.backgroundColor = .white
@@ -57,16 +61,19 @@ class FavoriteVC: UIViewController {
     
 }
 
-extension FavoriteVC: UITableViewDataSource {
+extension FavoriteVC: UITableViewDataSource,UITableViewDelegate {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return favviewModel.favoriteCars.count
     }
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
         let favoriteCar = favviewModel.favoriteCars[indexPath.row]
-        cell.textLabel?.text = "\(favoriteCar.name) - \(favoriteCar.price)"
+        cell.textLabel?.text = "\(favoriteCar.name)"
+        cell.textLabel?.font = .boldSystemFont(ofSize: 22)
+        cell.textLabel?.textAlignment = .left
         return cell
     }
+    
 
     func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {

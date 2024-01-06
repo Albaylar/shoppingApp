@@ -17,12 +17,27 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
         // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
         guard let windowScene = (scene as? UIWindowScene) else { return }
-        
+        updateBasketBadge()
         let window = UIWindow(windowScene: windowScene)
         window.rootViewController = TabBarVC()
         self.window = window
         window.makeKeyAndVisible()
+        
+
     }
+    private func updateBasketBadge() {
+            let basketItemCount = CoreDataManager.shared.fetchBasketItems().count
+
+            if let tabBarController = window?.rootViewController as? TabBarVC {
+                DispatchQueue.main.async {
+                    if basketItemCount > 0 {
+                        tabBarController.viewControllers?[1].tabBarItem.badgeValue = String(basketItemCount)
+                    } else {
+                        tabBarController.viewControllers?[1].tabBarItem.badgeValue = nil
+                    }
+                }
+            }
+        }
     
     func sceneDidDisconnect(_ scene: UIScene) {
         // Called as the scene is being released by the system.
@@ -34,6 +49,8 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func sceneDidBecomeActive(_ scene: UIScene) {
         // Called when the scene has moved from an inactive state to an active state.
         // Use this method to restart any tasks that were paused (or not yet started) when the scene was inactive.
+        
+
     }
     
     func sceneWillResignActive(_ scene: UIScene) {
@@ -44,7 +61,11 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     func sceneWillEnterForeground(_ scene: UIScene) {
         // Called as the scene transitions from the background to the foreground.
         // Use this method to undo the changes made on entering the background.
+        if let tabBarController = window?.rootViewController as? TabBarVC {
+            tabBarController.updateBasketBadge()
+        }
     }
+    
     
     func sceneDidEnterBackground(_ scene: UIScene) {
         // Called as the scene transitions from the foreground to the background.

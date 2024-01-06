@@ -41,7 +41,7 @@
 		69CC79682B46F5EB0086483E /* AlamofireImage in Frameworks */ = {isa = PBXBuildFile; productRef = 69CC79672B46F5EB0086483E /* AlamofireImage */; };
 		69CC796A2B46F6B40086483E /* Error.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69CC79692B46F6B40086483E /* Error.swift */; };
 		69CC796C2B46FFE10086483E /* Debouncer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69CC796B2B46FFE10086483E /* Debouncer.swift */; };
-		69CC79742B4765990086483E /* DetailVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69CC79732B4765990086483E /* DetailVC.swift */; };
+		69CC79742B4765990086483E /* CarDetailVC.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69CC79732B4765990086483E /* CarDetailVC.swift */; };
 		69CC79762B47664E0086483E /* Model.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69CC79752B47664E0086483E /* Model.swift */; };
 		69CC79782B47667C0086483E /* CarDetailViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69CC79772B47667C0086483E /* CarDetailViewModel.swift */; };
 /* End PBXBuildFile section */
@@ -99,7 +99,7 @@
 		69CC79642B46F5960086483E /* NetworkUtilitiy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NetworkUtilitiy.swift; sourceTree = "<group>"; };
 		69CC79692B46F6B40086483E /* Error.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Error.swift; sourceTree = "<group>"; };
 		69CC796B2B46FFE10086483E /* Debouncer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Debouncer.swift; sourceTree = "<group>"; };
-		69CC79732B4765990086483E /* DetailVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetailVC.swift; sourceTree = "<group>"; };
+		69CC79732B4765990086483E /* CarDetailVC.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarDetailVC.swift; sourceTree = "<group>"; };
 		69CC79752B47664E0086483E /* Model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Model.swift; sourceTree = "<group>"; };
 		69CC79772B47667C0086483E /* CarDetailViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CarDetailViewModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -428,7 +428,7 @@
 		69CC79712B47657E0086483E /* View */ = {
 			isa = PBXGroup;
 			children = (
-				69CC79732B4765990086483E /* DetailVC.swift */,
+				69CC79732B4765990086483E /* CarDetailVC.swift */,
 				696EA49B2B48B97700A35CD6 /* Notification.swift */,
 			);
 			path = View;
@@ -589,7 +589,7 @@
 				69CC78F92B469DA70086483E /* AppDelegate.swift in Sources */,
 				69CC79372B46A1CB0086483E /* ProfileVC.swift in Sources */,
 				696EA4982B48371E00A35CD6 /* CartViewModel.swift in Sources */,
-				69CC79742B4765990086483E /* DetailVC.swift in Sources */,
+				69CC79742B4765990086483E /* CarDetailVC.swift in Sources */,
 				69CC79632B46F57C0086483E /* NetworkManager.swift in Sources */,
 				69CC794F2B46B5F80086483E /* Home.swift in Sources */,
 				69CC794D2B46B5E70086483E /* HomeViewModel.swift in Sources */,

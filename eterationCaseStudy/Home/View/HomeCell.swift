@@ -58,9 +58,9 @@ class HomeCell: UICollectionViewCell {
         favoriteButton.layer.zPosition = 1
         favoriteButton.addTarget(self, action: #selector(favoriteButtonTapped), for: .touchUpInside)
         favoriteButton.snp.makeConstraints { make in
-            make.top.equalToSuperview().offset(10)
-            make.right.equalToSuperview().inset(10)
-            make.width.height.equalTo(30)
+            make.top.equalToSuperview().offset(6)
+            make.right.equalTo(imageView.snp.right).inset(6)
+            make.width.height.equalTo(24)
         }
         
         // Price Label Ayarları
@@ -87,7 +87,8 @@ class HomeCell: UICollectionViewCell {
         contentView.addSubview(addToCartButton)
         addToCartButton.setTitle("Add to Cart", for: .normal)
         addToCartButton.addTarget(self, action: #selector(addChartButtonTapped), for: .touchUpInside)
-        addToCartButton.backgroundColor = UIColor.blue
+        addToCartButton.backgroundColor = UIColor(red: 0.166, green: 0.349, blue: 0.996, alpha: 1)
+        addToCartButton.layer.cornerRadius = 4
         addToCartButton.titleLabel?.font = UIFont.systemFont(ofSize: 14)
         addToCartButton.snp.makeConstraints { make in
             make.top.equalTo(titleLabel.snp.bottom).offset(15)
@@ -101,10 +102,10 @@ class HomeCell: UICollectionViewCell {
         if isFavorite {
             favoriteButton.setImage(UIImage(systemName: "star.fill"), for: .normal)
             print(isFavorite)
-            favoriteButton.tintColor = .yellow // Favori ise sarı renk
+            favoriteButton.tintColor = .systemYellow
         } else {
             favoriteButton.setImage(UIImage(systemName: "star"), for: .normal)
-            favoriteButton.tintColor = .gray // Değilse gri renk
+            favoriteButton.tintColor = .gray
         }
     }
     func configure(with car: Car, isFavorite: Bool) {

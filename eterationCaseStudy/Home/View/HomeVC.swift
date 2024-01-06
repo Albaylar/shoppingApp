@@ -179,9 +179,7 @@ extension HomeVC : UICollectionViewDataSource, UICollectionViewDelegate {
         
     }
     @objc func favoriteUpdate() {
-        // Favoriler listesini yeniden yükleyin
         favoritesViewModel.fetchFavorites()
-        // collectionView'u yenileyin
         collectionView.reloadData()
     }
     @objc private func favoriteStatusChanged(_ notification: Notification) {

@@ -18,6 +18,7 @@ class BasketCell: UITableViewCell {
     let incrementButton = UIButton()
     let decrementButton = UIButton()
     var onQuantityChanged: ((Int) -> Void)?
+    var onRemoveProduct: (() -> Void)?
     
     
     override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
@@ -30,13 +31,13 @@ class BasketCell: UITableViewCell {
         setupViews()
     }
     func setupViews() {
-        productNameLabel.translatesAutoresizingMaskIntoConstraints = false
         productNameLabel.font = .systemFont(ofSize: 16)
         contentView.addSubview(productNameLabel)
         productNameLabel.snp.makeConstraints { make in
             make.left.top.equalToSuperview()
+            make.height.equalTo(16)
+            make.width.equalTo(180)
         }
-        productPriceLabel.translatesAutoresizingMaskIntoConstraints = false
         
         contentView.addSubview(productPriceLabel)
         productPriceLabel.font = .systemFont(ofSize: 13)
@@ -44,11 +45,14 @@ class BasketCell: UITableViewCell {
         productPriceLabel.snp.makeConstraints { make in
             make.top.equalTo(productNameLabel.snp.bottom).offset(2)
             make.left.equalToSuperview()
+            make.width.equalTo(180)
+            make.height.equalTo(26)
         }
         decrementButton.addTarget(self, action: #selector(decrementQuantity), for: .touchUpInside)
         decrementButton.translatesAutoresizingMaskIntoConstraints = false
         decrementButton.setTitle("-", for: .normal)
-        decrementButton.backgroundColor = UIColor(red: 0.166, green: 0.349, blue: 0.996, alpha: 0.3)
+        decrementButton.setTitleColor(.black, for: .normal)
+        decrementButton.backgroundColor = .systemGray6
         contentView.addSubview(decrementButton)
         decrementButton.snp.makeConstraints { make in
             make.left.equalTo(productNameLabel.snp.right).offset(15)
@@ -57,12 +61,11 @@ class BasketCell: UITableViewCell {
 
             make.height.equalTo(42)
         }
-        quantityLabel.translatesAutoresizingMaskIntoConstraints = false
         contentView.addSubview(quantityLabel)
         quantityLabel.layer.zPosition = 1
         quantityLabel.textColor = .white
         quantityLabel.textAlignment = .center
-        
+        quantityLabel.isHidden = false
         quantityLabel.backgroundColor = UIColor(red: 0.166, green: 0.349, blue: 0.996, alpha: 1)
         quantityLabel.snp.makeConstraints { make in
             make.left.equalTo(decrementButton.snp.right)
@@ -73,7 +76,8 @@ class BasketCell: UITableViewCell {
         incrementButton.addTarget(self, action: #selector(incrementQuantity), for: .touchUpInside)
         incrementButton.translatesAutoresizingMaskIntoConstraints = false
         incrementButton.setTitle("+", for: .normal)
-        incrementButton.backgroundColor = UIColor(red: 0.166, green: 0.349, blue: 0.996, alpha: 0.3)
+        incrementButton.setTitleColor(.black, for: .normal)
+        incrementButton.backgroundColor = .systemGray6
         contentView.addSubview(incrementButton)
         incrementButton.snp.makeConstraints { make in
             make.left.equalTo(quantityLabel.snp.right)
@@ -93,12 +97,16 @@ class BasketCell: UITableViewCell {
     }
     
     @objc func decrementQuantity() {
-        if let currentQuantity = Int(quantityLabel.text ?? "0"), currentQuantity > 1 {
-            let newQuantity = currentQuantity - 1
-            quantityLabel.text = "\(newQuantity)"
-            onQuantityChanged?(newQuantity)
+            if let currentQuantity = Int(quantityLabel.text ?? "0") {
+                if currentQuantity > 1 {
+                    let newQuantity = currentQuantity - 1
+                    quantityLabel.text = "\(newQuantity)"
+                    onQuantityChanged?(newQuantity)
+                } else {
+                    onRemoveProduct?()
+                }
+            }
         }
-    }
     
     func configure(with item: CartItem) {
         productNameLabel.text = item.productName
