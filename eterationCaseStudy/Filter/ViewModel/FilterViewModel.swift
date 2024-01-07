@@ -18,7 +18,6 @@ final class FilterViewModel {
     private var carService = CarService()
 
     
-    
     func loadFilterOptions(completion: @escaping () -> Void) {
         CarService.shared.getCars { [self] response in
             self.allCars = response

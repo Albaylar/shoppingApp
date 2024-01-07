@@ -111,7 +111,6 @@ final class BasketVC: UIViewController {
                 groupedItems[id] = CartItem(productId: id, productName: name, quantity: 1, price: price)
             }
         }
-        
         basketItems = Array(groupedItems.values)
         tableView.reloadData()
         updateEmptyBasketLabelVisibility()

@@ -28,19 +28,18 @@ class CarDetailVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
-        NotificationCenter.default.addObserver(self, selector: #selector(favoriteStatusChanged(_:)), name: .favoriteStatusChanged, object: nil)
         setupUI()
         displayCarDetails()
-        viewModel?.onFavoriteStatusChanged = { [weak self] isFavorite in
-            self?.updateFavoriteIcon(isFavorite: isFavorite)
-        }
+        favoriteControl()
     }
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         viewModel?.checkIfFavorite()
     }
     
+    
     private func setupUI() {
+        
         let topView = UIView()
         topView.backgroundColor = UIColor(red: 0.166, green: 0.349, blue: 0.996, alpha: 1)
         view.addSubview(topView)
@@ -49,6 +48,7 @@ class CarDetailVC: UIViewController {
             make.right.left.equalToSuperview()
             make.height.equalTo(50)
         }
+        
         let backButton = UIButton()
         backButton.setImage(UIImage(named: "backButton"), for: .normal)
         backButton.addTarget(self, action: #selector(backButtonTapped), for: .touchUpInside)
@@ -61,6 +61,7 @@ class CarDetailVC: UIViewController {
             make.height.equalTo(20)
             make.width.equalTo(21.67)
         }
+        
         topLabel.textAlignment = .center
         topLabel.textColor = .white
         topLabel.font = .boldSystemFont(ofSize: 18)
@@ -80,6 +81,7 @@ class CarDetailVC: UIViewController {
             make.left.right.equalToSuperview().inset(15)
             make.height.equalTo(225) // İmajın yüksekliği
         }
+        
         starView.setImage(UIImage(systemName: "star"), for: .normal)
         starView.layer.zPosition = 1
         starView.isUserInteractionEnabled = true
@@ -91,7 +93,7 @@ class CarDetailVC: UIViewController {
             make.height.equalTo(24)
             make.width.equalTo(24)
         }
-        // nameLabel Yapılandırması
+        
         nameLabel.font = UIFont.systemFont(ofSize: 20, weight: .bold)
         nameLabel.textAlignment = .left
         view.addSubview(nameLabel)
@@ -99,6 +101,7 @@ class CarDetailVC: UIViewController {
             make.top.equalTo(carImageView.snp.bottom).offset(16)
             make.left.right.equalToSuperview().inset(16)
         }
+        
         let scrollView = UIScrollView()
         scrollView.isUserInteractionEnabled = true
         view.addSubview(scrollView)
@@ -124,8 +127,8 @@ class CarDetailVC: UIViewController {
             make.bottom.equalTo(view.safeAreaLayoutGuide).inset(19)
             make.height.equalTo(44)
             make.width.equalTo(100)
-            
         }
+        
         let addToCartButton = UIButton()
         addToCartButton.setTitle("Add to Cart", for: .normal)
         addToCartButton.layer.cornerRadius = 4
@@ -140,14 +143,8 @@ class CarDetailVC: UIViewController {
             make.height.equalTo(38)
             make.width.equalTo(182)
         }
-        
     }
-    @objc private func favoriteStatusChanged(_ notification: Notification) {
-        guard let carId = notification.userInfo?["carId"] as? String, carId == viewModel?.id else {
-            return
-        }
-        viewModel?.checkIfFavorite()
-    }
+    
     
     private func displayCarDetails() {
         nameLabel.text = viewModel?.name
@@ -175,7 +172,17 @@ class CarDetailVC: UIViewController {
                 priceLabel.attributedText = priceText
             }
         }
-        
+    }
+    private func favoriteControl(){
+        viewModel?.onFavoriteStatusChanged = { [weak self] isFavorite in
+            self?.updateFavoriteIcon(isFavorite: isFavorite)
+        }
+    }
+    
+    private func updateFavoriteIcon(isFavorite: Bool) {
+        let iconName = isFavorite ? "star.fill" : "star"
+        starView.setImage(UIImage(systemName: iconName), for: .normal)
+        starView.tintColor = .systemYellow
     }
     
     @objc private func addChartButtonTapped(){
@@ -189,15 +196,12 @@ class CarDetailVC: UIViewController {
     @objc private func backButtonTapped() {
         onClose?()
     }
+    
     @objc private func favoriteButtonTapped() {
         if let isFavorite = viewModel?.isFavorite {
             viewModel?.updateFavoriteStatus(isFavorite: !isFavorite)
         }
     }
-    private func updateFavoriteIcon(isFavorite: Bool) {
-        let iconName = isFavorite ? "star.fill" : "star"
-        starView.setImage(UIImage(systemName: iconName), for: .normal)
-        starView.tintColor = .systemYellow
-    }
+    
     
 }

@@ -24,10 +24,11 @@ final class BasketCell: UITableViewCell {
         setupViews()
     }
     
-    required init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
-        setupViews()
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
+    
+
     func setupViews() {
         productNameLabel.font = .systemFont(ofSize: 16)
         contentView.addSubview(productNameLabel)

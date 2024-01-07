@@ -28,7 +28,9 @@ final class HomeVC: UIViewController {
         loadAllCars()
         setupNoResultLabel()
         
+        // Favori Status FavoritesUpdatedAgain to back of the HomeVC
         NotificationCenter.default.addObserver(self, selector: #selector(favoriteStatusChanged(_:)), name: NSNotification.Name("FavoritesUpdatedAgain"), object: nil)
+        // To Normal Favorite Updated Methods
         NotificationCenter.default.addObserver(self, selector: #selector(favoriteUpdate), name: NSNotification.Name("FavoritesUpdated"), object: nil)
 
         
@@ -220,7 +222,7 @@ extension HomeVC : UICollectionViewDataSource, UICollectionViewDelegate {
             detailVC.removeFromParent()
         }
     }
-    @objc func favoriteUpdate() {
+    @objc private func favoriteUpdate() {
         favoritesViewModel.fetchFavorites()
         collectionView.reloadData()
     }
@@ -238,7 +240,7 @@ extension HomeVC : UICollectionViewDataSource, UICollectionViewDelegate {
     }
 }
 extension HomeVC: FilterViewControllerDelegate {
-    func didApplyFilters(brand: String?, model: String?, sortOption: SortOption?) {
+     func didApplyFilters(brand: String?, model: String?, sortOption: SortOption?) {
         viewModel.filterCars(brand: brand, model: model, sortOption: sortOption)
         
         print("Filtrelenmiş araç sayısı: \(viewModel.cars.count)")

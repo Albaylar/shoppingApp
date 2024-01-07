@@ -36,10 +36,10 @@ final class HomeCell: UICollectionViewCell {
         setupViews()
     }
     
-    required init?(coder aDecoder: NSCoder) {
-        super.init(coder: aDecoder)
-        setupViews()
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
     }
+    
     
     private func setupViews() {
         
@@ -52,6 +52,7 @@ final class HomeCell: UICollectionViewCell {
             make.left.right.equalToSuperview().inset(10)
             make.height.equalTo(imageView.snp.width).multipliedBy(0.9) 
         }
+        
         imageView.addSubview(favoriteButton)
         favoriteButton.setImage(UIImage(systemName: "star"), for: .normal)
         favoriteButton.tintColor = .gray

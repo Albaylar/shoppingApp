@@ -27,12 +27,10 @@ final class FilterVC: UIViewController {
     var sortButtons = [UIButton]()
     weak var delegate: FilterViewControllerDelegate?
     
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
         loadFilterOptionsToViewModel()
-        
     }
     
     private func setupUI(){
@@ -94,11 +92,13 @@ final class FilterVC: UIViewController {
             make.left.equalToSuperview().inset(16)
             make.right.equalToSuperview().inset(28)
         }
+        
         for option in sortOptions {
             let button = createRadioButtonWithTitle(option)
             sortButtons.append(button)
             sortByStackView.addArrangedSubview(button)
         }
+        
         let lineView2 = UIView()
         lineView2.backgroundColor = .black
         view.addSubview(lineView2)
@@ -117,6 +117,7 @@ final class FilterVC: UIViewController {
             make.left.equalToSuperview().inset(18)
             make.height.equalTo(15)
         }
+        
         brandsSearchBar.placeholder = "Search Brand"
         brandsSearchBar.backgroundImage = UIImage()
         view.addSubview(brandsSearchBar)
@@ -125,6 +126,7 @@ final class FilterVC: UIViewController {
             make.right.left.equalToSuperview().inset(36)
             make.height.equalTo(40)
         }
+        
         let brandsScrollView = UIScrollView()
         view.addSubview(brandsScrollView)
         brandsScrollView.snp.makeConstraints { make in
@@ -132,6 +134,7 @@ final class FilterVC: UIViewController {
             make.left.right.equalToSuperview().inset(33)
             make.height.equalTo(95)
         }
+        
         brandsStackView.axis = .vertical
         brandsStackView.alignment = .fill
         brandsStackView.distribution = .fillEqually
@@ -150,6 +153,7 @@ final class FilterVC: UIViewController {
             make.right.left.equalToSuperview().inset(15)
             make.height.equalTo(1.5)
         }
+        
         let modelNameLabel = UILabel()
         modelNameLabel.text = "Model"
         modelNameLabel.font = .systemFont(ofSize: 16)
@@ -176,6 +180,7 @@ final class FilterVC: UIViewController {
             make.left.right.equalToSuperview().inset(33)
             make.height.equalTo(95)
         }
+        
         modelsStackView.axis = .vertical
         modelsStackView.alignment = .fill
         modelsStackView.distribution = .fillEqually
@@ -187,6 +192,7 @@ final class FilterVC: UIViewController {
             make.leading.trailing.equalToSuperview()
             make.width.equalTo(modelsScrollView)
         }
+        
         applyButton.setTitle("Primary", for: .normal)
         applyButton.backgroundColor = UIColor(red: 0.166, green: 0.349, blue: 0.996, alpha: 1)
         applyButton.addTarget(self, action: #selector(applyButtonTapped), for: .touchUpInside)
@@ -231,9 +237,9 @@ final class FilterVC: UIViewController {
     }
     private func updateUIWithFilters() {
         updateBrandButtons(with: viewModel.brands)
-        print(viewModel.brands)
+//        print(viewModel.brands)
         updateModelButtons(with: viewModel.models)
-        print(viewModel.models)
+//        print(viewModel.models)
     }
     @objc private func checkboxTapped(_ sender: UIButton) {
         sender.isSelected.toggle()

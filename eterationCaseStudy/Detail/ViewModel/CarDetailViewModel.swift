@@ -71,8 +71,6 @@ class CarDetailViewModel {
         } else {
             CoreDataManager.shared.removeCarItemFromCoreData(id: idInt)
         }
-
-        
         onFavoriteStatusChanged?(isFavorite)
         self.isFavorite = isFavorite
         NotificationCenter.default.post(name: NSNotification.Name("FavoritesUpdatedAgain"), object: nil, userInfo: ["carId": car.id])

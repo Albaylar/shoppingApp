@@ -15,8 +15,8 @@ final class HomeViewModel {
     private let debouncer = Debouncer(delay: 0.5)
     
     private var currentPage = 1
-        private var isFetchingMoreCars = false
-        var hasMoreCarsToLoad: Bool = true
+    private var isFetchingMoreCars = false
+    var hasMoreCarsToLoad: Bool = true
     
     func loadAllCars(completion: @escaping () -> Void) {
         carService.getCars { [weak self] cars in
@@ -29,7 +29,7 @@ final class HomeViewModel {
             print(error)
         }
     }
-
+    
     func performSearch(with query: String, completion: @escaping () -> Void) {
         debouncer.debounce { [weak self] in
             if query.isEmpty {
@@ -49,7 +49,7 @@ final class HomeViewModel {
         }
     }
     
-
+    
     func loadMoreCars(completion: @escaping () -> Void) {
         guard hasMoreCarsToLoad && !isFetchingMoreCars else {
             return
@@ -64,28 +64,28 @@ final class HomeViewModel {
             completion()
         }
     }
-
+    
     func filterCars(brand: String?, model: String?, sortOption: SortOption?) {
-            cars = allCars.filter { car in
-                let matchesBrand = brand == nil || brand!.isEmpty || car.brand?.lowercased() == brand!.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
-                let matchesModel = model == nil || model!.isEmpty || car.model?.lowercased() == model!.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
-                return matchesBrand && matchesModel
-            }
-            
-            if let sortOption = sortOption {
-                switch sortOption {
-                case .priceAscending:
-                    cars.sort { (Double($0.price ?? "") ?? 0.0) < (Double($1.price ?? "") ?? 0.0) }
-                case .priceDescending:
-                    cars.sort { (Double($0.price ?? "") ?? 0.0) > (Double($1.price ?? "") ?? 0.0) }
-                case .dateAscending:
-                    cars.sort { parseDate($0.createdAt ?? "") ?? Date.distantPast < parseDate($1.createdAt ?? "") ?? Date.distantPast }
-                case .dateDescending:
-                    cars.sort { parseDate($0.createdAt ?? "") ?? Date.distantPast > parseDate($1.createdAt ?? "") ?? Date.distantPast }
-                }
+        cars = allCars.filter { car in
+            let matchesBrand = brand == nil || brand!.isEmpty || car.brand?.lowercased() == brand!.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+            let matchesModel = model == nil || model!.isEmpty || car.model?.lowercased() == model!.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
+            return matchesBrand && matchesModel
+        }
+        
+        if let sortOption = sortOption {
+            switch sortOption {
+            case .priceAscending:
+                cars.sort { (Double($0.price ?? "") ?? 0.0) < (Double($1.price ?? "") ?? 0.0) }
+            case .priceDescending:
+                cars.sort { (Double($0.price ?? "") ?? 0.0) > (Double($1.price ?? "") ?? 0.0) }
+            case .dateAscending:
+                cars.sort { parseDate($0.createdAt ?? "") ?? Date.distantPast < parseDate($1.createdAt ?? "") ?? Date.distantPast }
+            case .dateDescending:
+                cars.sort { parseDate($0.createdAt ?? "") ?? Date.distantPast > parseDate($1.createdAt ?? "") ?? Date.distantPast }
             }
         }
     }
+}
 
 func parseDate(_ dateString: String) -> Date? {
     let dateFormatter = DateFormatter()
