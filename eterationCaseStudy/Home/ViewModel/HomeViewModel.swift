@@ -33,7 +33,8 @@ final class HomeViewModel {
     func performSearch(with query: String, completion: @escaping () -> Void) {
         debouncer.debounce { [weak self] in
             if query.isEmpty {
-                self?.loadAllCars(completion: completion)
+                self?.cars = self?.allCars ?? []
+                completion()
             } else {
                 self?.carService.getCars { cars in
                     let filteredCars = cars.filter { car in
@@ -47,6 +48,7 @@ final class HomeViewModel {
             }
         }
     }
+
     func loadMoreCars(completion: @escaping () -> Void) {
         guard hasMoreCarsToLoad && !isFetchingMoreCars else {
             return

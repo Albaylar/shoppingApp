@@ -97,8 +97,7 @@ extension FavoriteVC: UITableViewDataSource,UITableViewDelegate {
             favviewModel.deleteFavoriteCar(withId: favoriteCar.id)
             favviewModel.favoriteCars.remove(at: indexPath.row)
             tableView.deleteRows(at: [indexPath], with: .fade)
-            
-            NotificationCenter.default.post(name: NSNotification.Name("updateWithFavorites"), object: nil)
+            NotificationCenter.default.post(name: NSNotification.Name("FavoritesUpdated"), object: nil)
         }
     }
 }

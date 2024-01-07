@@ -95,7 +95,7 @@ final class HomeCell: UICollectionViewCell {
         }
     }
     
-    private func updateFavoriteButtonAppearance() {
+     func updateFavoriteButtonAppearance() {
         if isFavorite {
             favoriteButton.setImage(UIImage(systemName: "star.fill"), for: .normal)
             print(isFavorite)
