@@ -108,7 +108,6 @@ class CarDetailVC: UIViewController {
             make.bottom.equalTo(view.safeAreaLayoutGuide).inset(80)
         }
         
-        // descriptionLabel Yapılandırması
         descriptionLabel.font = UIFont.systemFont(ofSize: 18)
         descriptionLabel.numberOfLines = 0
         scrollView.addSubview(descriptionLabel)
@@ -116,7 +115,6 @@ class CarDetailVC: UIViewController {
             make.edges.equalToSuperview()
             make.width.equalTo(scrollView.snp.width)
         }
-        
         
         view.addSubview(priceLabel)
         priceLabel.numberOfLines = 2
@@ -169,12 +167,10 @@ class CarDetailVC: UIViewController {
                     NSAttributedString.Key.foregroundColor: UIColor.blue,
                     NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18)
                 ])
-                
                 let priceValue = NSAttributedString(string: "\(formattedPrice) ₺", attributes: [
                     NSAttributedString.Key.foregroundColor: UIColor.black,
                     NSAttributedString.Key.font: UIFont.boldSystemFont(ofSize: 18)
                 ])
-                
                 priceText.append(priceValue)
                 priceLabel.attributedText = priceText
             }
@@ -192,14 +188,12 @@ class CarDetailVC: UIViewController {
 
     @objc private func backButtonTapped() {
         onClose?()
-        
     }
     @objc private func favoriteButtonTapped() {
         if let isFavorite = viewModel?.isFavorite {
             viewModel?.updateFavoriteStatus(isFavorite: !isFavorite)
         }
     }
-    
     private func updateFavoriteIcon(isFavorite: Bool) {
         let iconName = isFavorite ? "star.fill" : "star"
         starView.setImage(UIImage(systemName: iconName), for: .normal)

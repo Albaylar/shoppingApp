@@ -72,7 +72,6 @@ final class HomeCell: UICollectionViewCell {
             make.left.right.equalToSuperview().inset(10)
         }
         
-        // Title Label Set
         contentView.addSubview(titleLabel)
         titleLabel.text =  "iphone 14 promax"
         titleLabel.textAlignment = .left
@@ -82,7 +81,6 @@ final class HomeCell: UICollectionViewCell {
             make.left.right.equalToSuperview().inset(10)
         }
         
-        // Add to Cart Button set
         contentView.addSubview(addToCartButton)
         addToCartButton.setTitle("Add to Cart", for: .normal)
         addToCartButton.addTarget(self, action: #selector(addChartButtonTapped), for: .touchUpInside)

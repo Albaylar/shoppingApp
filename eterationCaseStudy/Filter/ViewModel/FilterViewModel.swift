@@ -15,6 +15,9 @@ final class FilterViewModel {
     var brands: [String] = []
     var models: [String] = []
     var allCars: [Car] = []
+    private var carService = CarService()
+
+    
     
     func loadFilterOptions(completion: @escaping () -> Void) {
         CarService.shared.getCars { [self] response in

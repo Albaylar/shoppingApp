@@ -246,6 +246,7 @@ extension HomeVC: FilterViewControllerDelegate {
         }
     }
 }
+
 extension HomeVC: HomeCellDelegate {
     func addToCartButtonTapped(for car: Car) {
         CoreDataManager.shared.saveCarToCart(data: car)

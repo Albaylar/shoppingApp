@@ -9,7 +9,12 @@ import Foundation
 import UIKit
 
 extension UIFont {
-    static func montserratExtraBold(ofSize size: CGFloat) -> UIFont? {
-            return UIFont(name: "Montserrat-ExtraBold", size: size)
-        }
+    
+    static func montserratRegular(size: CGFloat) -> UIFont? {
+        return UIFont(name: "Montserrat-Regular", size: size)
+    }
+
+     static func montserratBold(size: CGFloat) -> UIFont? {
+         return UIFont(name: "Montserrat-Bold", size: size)
+     }
 }

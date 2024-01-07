@@ -7,11 +7,9 @@
 
 import Foundation
 
-
-
 final class HomeViewModel {
-    var allCars: [Car] = [] // Tüm araçların listesi
-    var cars: [Car] = [] // Filtrelenmiş veya gösterilecek araçların listesi
+    var allCars: [Car] = []
+    var cars: [Car] = []
     
     private let carService = CarService.shared
     private let debouncer = Debouncer(delay: 0.5)
@@ -32,7 +30,6 @@ final class HomeViewModel {
         }
     }
 
-    
     func performSearch(with query: String, completion: @escaping () -> Void) {
         debouncer.debounce { [weak self] in
             if query.isEmpty {
@@ -54,11 +51,10 @@ final class HomeViewModel {
         guard hasMoreCarsToLoad && !isFetchingMoreCars else {
             return
         }
-
         isFetchingMoreCars = true
         currentPage += 1
         let nextCars = Array(allCars.prefix(4 * currentPage))
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { // Bir saniye gecikme ile simülasyon yapılır
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
             self.cars = nextCars
             self.hasMoreCarsToLoad = self.allCars.count > nextCars.count
             self.isFetchingMoreCars = false
@@ -66,9 +62,6 @@ final class HomeViewModel {
         }
     }
 
-
-
-    
     func filterCars(brand: String?, model: String?, sortOption: SortOption?) {
             cars = allCars.filter { car in
                 let matchesBrand = brand == nil || brand!.isEmpty || car.brand?.lowercased() == brand!.lowercased().trimmingCharacters(in: .whitespacesAndNewlines)
@@ -93,7 +86,7 @@ final class HomeViewModel {
 
 func parseDate(_ dateString: String) -> Date? {
     let dateFormatter = DateFormatter()
-    dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ" // Milisaniyeler için "SSS" eklendi
+    dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss.SSSZ"
     return dateFormatter.date(from: dateString)
 }
 

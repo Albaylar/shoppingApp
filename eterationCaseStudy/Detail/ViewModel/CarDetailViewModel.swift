@@ -12,7 +12,7 @@ import UIKit
 
 class CarDetailViewModel {
     var car: Car
-    var isFavorite: Bool = false // Add this line
+    var isFavorite: Bool = false
     var onFavoriteStatusChanged: ((Bool) -> Void)?
 
     init(car: Car) {
@@ -54,7 +54,7 @@ class CarDetailViewModel {
         do {
             let results = try managedContext.fetch(fetchRequest)
             let isFav = results.count > 0
-            self.isFavorite = isFav // Update isFavorite here
+            self.isFavorite = isFav 
             onFavoriteStatusChanged?(isFav)
         } catch let error as NSError {
             print("Error occurred: \(error), \(error.userInfo)")

@@ -31,18 +31,14 @@ final class FilterVC: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
-        brandsSearchBar.delegate = self
-        modelsSearchBar.delegate = self
-        viewModel.loadFilterOptions {
-            DispatchQueue.main.async {
-                self.updateUIWithFilters()
-            }
-        }
+        loadFilterOptionsToViewModel()
         
     }
+    
     private func setupUI(){
         view.backgroundColor = .white
-        // Close Button Image
+        brandsSearchBar.delegate = self
+        modelsSearchBar.delegate = self
         let closeImage = UIImageView()
         closeImage.image = UIImage(named: "closeButton")
         closeImage.isUserInteractionEnabled = true
@@ -55,7 +51,6 @@ final class FilterVC: UIViewController {
             make.left.equalToSuperview().inset(23)
             make.height.width.equalTo(20)
         }
-        // Top Label
         let topLabel = UILabel()
         topLabel.text = "Filter"
         topLabel.font = UIFont.montserratBold(size: 20)
@@ -197,7 +192,7 @@ final class FilterVC: UIViewController {
         applyButton.addTarget(self, action: #selector(applyButtonTapped), for: .touchUpInside)
         view.addSubview(applyButton)
         applyButton.snp.makeConstraints { make in
-            make.top.equalTo(modelsScrollView.snp.bottom).offset(20) // Models ScrollView altında
+            make.top.equalTo(modelsScrollView.snp.bottom).offset(20)
             make.left.right.equalToSuperview().inset(17)
             make.height.equalTo(38)
         }
@@ -207,19 +202,20 @@ final class FilterVC: UIViewController {
         button.setImage(UIImage(systemName: "circle"), for: .normal)
         button.setImage(UIImage(systemName: "circle.inset.filled"), for: .selected)
         button.setTitle(title, for: .normal)
-        button.setTitleColor(.black, for: .normal) // Renkleri ayarlayın
+        button.setTitleColor(.black, for: .normal)
         button.contentHorizontalAlignment = .left
         button.titleEdgeInsets = UIEdgeInsets(top: 0, left: 9, bottom: 0, right: 0)
         button.addTarget(self, action: #selector(radioButtonTapped(_:)), for: .touchUpInside)
         button.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: button.frame.width - button.titleLabel!.frame.width - button.imageView!.frame.width - 9)
         return button
     }
-    @objc private func radioButtonTapped(_ sender: UIButton) {
-        for button in sortButtons {
-            button.isSelected = false
+    
+    private func loadFilterOptionsToViewModel(){
+        viewModel.loadFilterOptions {
+            DispatchQueue.main.async {
+                self.updateUIWithFilters()
+            }
         }
-        
-        sender.isSelected = true
     }
     private func createCheckboxButtonWithTitle(_ title: String) -> UIButton {
         let button = UIButton()
@@ -233,9 +229,22 @@ final class FilterVC: UIViewController {
         button.imageEdgeInsets = UIEdgeInsets(top: 0, left: 0, bottom: 0, right: button.frame.width - button.titleLabel!.frame.width - button.imageView!.frame.width - 9)
         return button
     }
+    private func updateUIWithFilters() {
+        updateBrandButtons(with: viewModel.brands)
+        print(viewModel.brands)
+        updateModelButtons(with: viewModel.models)
+        print(viewModel.models)
+    }
     @objc private func checkboxTapped(_ sender: UIButton) {
         sender.isSelected.toggle()
         
+    }
+    @objc private func radioButtonTapped(_ sender: UIButton) {
+        for button in sortButtons {
+            button.isSelected = false
+        }
+        
+        sender.isSelected = true
     }
     
     @objc private func closeTapped() {
@@ -267,12 +276,7 @@ final class FilterVC: UIViewController {
         sortButtons.forEach { $0.isSelected = false }
         sender.isSelected = true
     }
-    private func updateUIWithFilters() {
-        updateBrandButtons(with: viewModel.brands)
-        print(viewModel.brands)
-        updateModelButtons(with: viewModel.models)
-        print(viewModel.models)
-    }
+    
 }
 extension FilterVC : UISearchBarDelegate {
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
