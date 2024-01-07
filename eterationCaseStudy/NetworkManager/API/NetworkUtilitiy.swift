@@ -8,9 +8,9 @@
 import Foundation
 import Alamofire
 
-enum ApiConfig: String {
-    case baseUrl = "https://5fc9346b2af77700165ae514.mockapi.io/products"
-}
+//enum ApiConfig: String {
+//    case baseUrl = "https://5fc9346b2af77700165ae514.mockapi.io/products"
+//}
 struct Header {
     static let shared = Header()
     func header() -> HTTPHeaders { return ["Content-Type": "application/json"] }
