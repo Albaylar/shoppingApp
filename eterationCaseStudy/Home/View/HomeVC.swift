@@ -29,6 +29,8 @@ final class HomeVC: UIViewController {
         setupNoResultLabel()
         
         NotificationCenter.default.addObserver(self, selector: #selector(favoriteStatusChanged(_:)), name: NSNotification.Name("FavoritesUpdatedAgain"), object: nil)
+        NotificationCenter.default.addObserver(self, selector: #selector(favoriteUpdate), name: NSNotification.Name("FavoritesUpdated"), object: nil)
+
         
     }
     override func viewDidLayoutSubviews() {

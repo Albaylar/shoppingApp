@@ -48,6 +48,7 @@ final class HomeViewModel {
             }
         }
     }
+    
 
     func loadMoreCars(completion: @escaping () -> Void) {
         guard hasMoreCarsToLoad && !isFetchingMoreCars else {
