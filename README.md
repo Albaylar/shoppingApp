@@ -13,6 +13,11 @@
 - **Local Database with CoreData:** Store user preferences and cart information locally.
 - **Responsive Design:** Compatible with different devices and screen sizes.
 - **Network Communication with Alamofire:** Manage API requests using **Alamofire**, a Swift-based HTTP networking library.
+- **Network Manager:** All service requests are handled through a custom network manager class.
+- **Infinite Scroll Feature:** The product list supports infinite scrolling, loading items in batches of four.
+- **Tab Bar Badge for Cart** Displays the number of items in the shopping cart as a badge on the tab bar.
+- **No Data Handling:** Properly handles scenarios where no data is available.
+- **Loading Scenarios Managed:** Ensures smooth user experience by handling various loading states.
 
 
 
@@ -25,10 +30,12 @@
 - **Postman:** Utilized for API testing and endpoint management.
 - **Alamofire and AlamofireImage:** Employs Alamofire for network requests and AlamofireImage for efficient image handling and caching.
 - **MVVM Design Pattern:** Adopts the Model-View-ViewModel pattern for enhanced maintainability and separation of concerns.
+- **Unit Testing:** Ensures reliability and robustness through comprehensive unit tests.
 
 # Installation
 
 git clone https://github.com/kullaniciadi/shoppingApp.git
+
 cd shoppingApp
 
 
