@@ -45,7 +45,7 @@ class CarDetailViewModel {
 
     func checkIfFavorite() {
         guard let appDelegate = UIApplication.shared.delegate as? AppDelegate,
-              let carId = car.id else { return }
+        let carId = car.id else { return }
         let managedContext = appDelegate.persistentContainer.viewContext
 
         let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: "Entity")
@@ -73,7 +73,7 @@ class CarDetailViewModel {
         }
         onFavoriteStatusChanged?(isFavorite)
         self.isFavorite = isFavorite
-        NotificationCenter.default.post(name: NSNotification.Name("FavoritesUpdatedAgain"), object: nil, userInfo: ["carId": car.id])
+        NotificationCenter.default.post(name: NSNotification.Name("FavoritesUpdatedInDetail"), object: nil, userInfo: ["carId": car.id ?? 0])
 
     }
     

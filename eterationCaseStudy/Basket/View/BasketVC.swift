@@ -11,8 +11,8 @@ import CoreData
 
 final class BasketVC: UIViewController {
     var basketItems: [CartItem] = []
-    let tableView = UITableView()
-    let totalPriceLabel = UILabel()
+    private let tableView = UITableView()
+    private let totalPriceLabel = UILabel()
     private let emptyBasketLabel = UILabel()
     
     override func viewDidLoad() {
@@ -124,7 +124,7 @@ final class BasketVC: UIViewController {
         var totalPrice = 0.0
         
         for item in basketItems {
-            totalPrice += item.price * Double(item.quantity)
+            totalPrice += item.price * Double((item.quantity))
         }
         let attributedString = NSMutableAttributedString(
             string: "Price: ",
@@ -150,7 +150,6 @@ final class BasketVC: UIViewController {
 extension BasketVC: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return basketItems.count
-        
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {

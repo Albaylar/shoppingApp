@@ -23,19 +23,19 @@ final class CoreDataManager {
     
     //MARK: - Functions
     
-    func fetchAllCarItems() -> [Entity] {
-        var coreDataItems = [Entity]()
-        let appDelegate = UIApplication.shared.delegate as? AppDelegate
-        let managedObjectContext = appDelegate?.persistentContainer.viewContext
-        let fetchRequest = NSFetchRequest<Entity>(entityName: "Entity")
-        
-        do {
-            coreDataItems = try managedObjectContext!.fetch(fetchRequest)
-        } catch {
-            print("Fetching from Core Data failed: \(error)")
-        }
-        return coreDataItems
-    }
+//    func fetchAllCarItems() -> [Entity] {
+//        var coreDataItems = [Entity]()
+//        let appDelegate = UIApplication.shared.delegate as? AppDelegate
+//        let managedObjectContext = appDelegate?.persistentContainer.viewContext
+//        let fetchRequest = NSFetchRequest<Entity>(entityName: "Entity")
+//        
+//        do {
+//            coreDataItems = try managedObjectContext!.fetch(fetchRequest)
+//        } catch {
+//            print("Fetching from Core Data failed: \(error)")
+//        }
+//        return coreDataItems
+//    }
     
     func saveCarsToCoreData(data: Car?) {
         let appDelegate = UIApplication.shared.delegate as? AppDelegate
@@ -93,17 +93,6 @@ final class CoreDataManager {
         }
     }
     
-    func deleteAllCoreDataObjects(context: NSManagedObjectContext) {
-        do {
-            let fetchRequest = NSFetchRequest<Entity>(entityName: "Entity")
-            let objects = try context.fetch(fetchRequest)
-            _ = objects.map({context.delete($0)})
-            try context.save()
-        } catch {
-            print("Deleting error: \(error)")
-        }
-    }
-    
     // Sepett
     func saveCarToCart(data: Car?, quantity: Int = 1) {
         guard let appDelegate = UIApplication.shared.delegate as? AppDelegate,
@@ -114,7 +103,6 @@ final class CoreDataManager {
         basketItem.name = carData.name
         basketItem.price = carData.price
         basketItem.id = carData.id
-        basketItem.quantity = Int64(quantity)
         
         do {
             try managedObjectContext.save()

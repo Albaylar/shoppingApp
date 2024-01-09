@@ -5,6 +5,7 @@
 //  Created by Furkan Deniz Albaylar on 4.01.2024.
 //
 
+
 import UIKit
 import SnapKit
 
@@ -37,6 +38,8 @@ final class FilterVC: UIViewController {
         view.backgroundColor = .white
         brandsSearchBar.delegate = self
         modelsSearchBar.delegate = self
+        
+
         let closeImage = UIImageView()
         closeImage.image = UIImage(named: "closeButton")
         closeImage.isUserInteractionEnabled = true
@@ -179,6 +182,7 @@ final class FilterVC: UIViewController {
             make.top.equalTo(modelsSearchBar.snp.bottom).offset(23)
             make.left.right.equalToSuperview().inset(33)
             make.height.equalTo(95)
+
         }
         
         modelsStackView.axis = .vertical
@@ -191,6 +195,7 @@ final class FilterVC: UIViewController {
             make.top.bottom.equalToSuperview()
             make.leading.trailing.equalToSuperview()
             make.width.equalTo(modelsScrollView)
+
         }
         
         applyButton.setTitle("Primary", for: .normal)

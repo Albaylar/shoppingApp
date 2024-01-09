@@ -102,7 +102,7 @@ final class HomeCell: UICollectionViewCell {
             print(isFavorite)
             favoriteButton.tintColor = .systemYellow
         } else {
-            favoriteButton.setImage(UIImage(systemName: "star"), for: .normal)
+            favoriteButton.setImage(UIImage(systemName: "star.fill"), for: .normal)
             favoriteButton.tintColor = .gray
         }
     }

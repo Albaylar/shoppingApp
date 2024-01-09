@@ -14,7 +14,7 @@ final class HomeVC: UIViewController {
     private let debouncer = Debouncer(delay: 0)
     private var viewModel = HomeViewModel()
     private let favoritesViewModel = FavoriteViewModel()
-    private let basketVC = BasketVC()
+//    private let basketVC = BasketVC()
     let collectionView = UICollectionView(frame: .zero, collectionViewLayout: UICollectionViewFlowLayout())
     var containerView: UIView?
     private let spinner = UIActivityIndicatorView(style: .medium)
@@ -27,10 +27,11 @@ final class HomeVC: UIViewController {
         setupSpinner()
         loadAllCars()
         setupNoResultLabel()
-        // Favori Status FavoritesUpdatedAgain to back of the HomeVC
-        NotificationCenter.default.addObserver(self, selector: #selector(favoriteStatusChanged(_:)), name: NSNotification.Name("FavoritesUpdatedAgain"), object: nil)
-        // To Normal Favorite Updated Methods
+        // Favori Status FavoritesUpdatedAgain to back of the HomeVC -- Detail
+        NotificationCenter.default.addObserver(self, selector: #selector(favoriteStatusChanged(_:)), name: NSNotification.Name("FavoritesUpdatedInDetail"), object: nil)
+        // To Normal Favorite Updated Methods -- Favorites Page
         NotificationCenter.default.addObserver(self, selector: #selector(favoriteUpdate), name: NSNotification.Name("FavoritesUpdated"), object: nil)
+        updateNoResultLabel()
 
     }
     override func viewDidLayoutSubviews() {
@@ -138,6 +139,8 @@ final class HomeVC: UIViewController {
         viewModel.loadAllCars() {
             self.spinner.stopAnimating()
             self.collectionView.reloadData()
+            self.updateNoResultLabel()
+
         }
     }
     private func setupNoResultLabel() {
@@ -146,13 +149,17 @@ final class HomeVC: UIViewController {
         noResultLabel.isHidden = true
         view.addSubview(noResultLabel)
         noResultLabel.snp.makeConstraints { make in
-            make.center.equalToSuperview()
+            make.centerY.equalToSuperview().offset(50)
+            make.centerX.equalToSuperview()
             make.left.right.equalTo(view.safeAreaLayoutGuide).inset(20)
         }
     }
     
     private func updateNoResultLabel() {
-        noResultLabel.isHidden = !viewModel.cars.isEmpty
+        DispatchQueue.main.async {
+            self.noResultLabel.isHidden = !self.viewModel.cars.isEmpty
+        }
+        
     }
     
     @objc func selectFilterButtonTapped() {
@@ -163,16 +170,17 @@ final class HomeVC: UIViewController {
     }
 }
 extension HomeVC: UISearchBarDelegate {
-    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        if let query = searchBar.text {
-            spinner.startAnimating()
-            viewModel.performSearch(with: query) {
-                self.spinner.stopAnimating()
-                self.collectionView.reloadData()
-            }
-        }
-        searchBar.resignFirstResponder()
-    }
+    //
+//    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+//        if let query = searchBar.text {
+//            spinner.startAnimating()
+//            viewModel.performSearch(with: query) {
+//                self.spinner.stopAnimating()
+//                self.collectionView.reloadData()
+//            }
+//        }
+//        searchBar.resignFirstResponder()
+//    }
     
     func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
         viewModel.performSearch(with: searchText) {
