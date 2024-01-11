@@ -223,9 +223,8 @@ final class FilterVC: UIViewController {
     
     private func loadFilterOptionsToViewModel(){
         viewModel.loadFilterOptions {
-            DispatchQueue.main.async {
-                self.updateUIWithFilters()
-            }
+            self.updateUIWithFilters()
+            
         }
     }
     private func createCheckboxButtonWithTitle(_ title: String) -> UIButton {
@@ -242,9 +241,7 @@ final class FilterVC: UIViewController {
     }
     private func updateUIWithFilters() {
         updateBrandButtons(with: viewModel.brands)
-//        print(viewModel.brands)
         updateModelButtons(with: viewModel.models)
-//        print(viewModel.models)
     }
     @objc private func checkboxTapped(_ sender: UIButton) {
         sender.isSelected.toggle()

@@ -12,7 +12,7 @@ final class HomeViewModel {
     var cars: [Car] = []
     
     private let carService = CarService.shared
-    private let debouncer = Debouncer(delay: 0.5)
+    private let debouncer = Debouncer(delay: 0.8)
     
     private var currentPage = 1
     private var isFetchingMoreCars = false
@@ -48,7 +48,6 @@ final class HomeViewModel {
             }
         }
     }
-    
     
     func loadMoreCars(completion: @escaping () -> Void) {
         guard hasMoreCarsToLoad && !isFetchingMoreCars else {

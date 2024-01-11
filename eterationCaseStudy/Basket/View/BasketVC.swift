@@ -14,6 +14,7 @@ final class BasketVC: UIViewController {
     private let tableView = UITableView()
     private let totalPriceLabel = UILabel()
     private let emptyBasketLabel = UILabel()
+    private let viewModel = BasketViewModel()
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -25,8 +26,9 @@ final class BasketVC: UIViewController {
     override func viewWillAppear(_ animated: Bool) {
         loadBasketItems()
         updateTotalPriceAndQuantity()
-
+        
     }
+    
     func setupUI() {
         view.backgroundColor = .white
         let topView = UIView()
@@ -86,70 +88,51 @@ final class BasketVC: UIViewController {
         }
     }
     private func setupEmptyBasketLabel() {
-            emptyBasketLabel.text = "Sepetinizde ürün bulunmamaktadır"
-            emptyBasketLabel.textAlignment = .center
-            emptyBasketLabel.isHidden = true 
-            emptyBasketLabel.layer.zPosition = 1
-            view.addSubview(emptyBasketLabel)
-            emptyBasketLabel.snp.makeConstraints { make in
-                make.center.equalToSuperview()
-                make.left.right.equalToSuperview().inset(20)
-            }
+        emptyBasketLabel.text = "Sepetinizde ürün bulunmamaktadır"
+        emptyBasketLabel.textAlignment = .center
+        emptyBasketLabel.isHidden = true
+        emptyBasketLabel.layer.zPosition = 1
+        view.addSubview(emptyBasketLabel)
+        emptyBasketLabel.snp.makeConstraints { make in
+            make.center.equalToSuperview()
+            make.left.right.equalToSuperview().inset(20)
         }
+    }
     
     @objc func loadBasketItems() {
-        let fetchedItems = CoreDataManager.shared.fetchBasketItems()
-        var groupedItems = [String: CartItem]()
-        
-        for entity in fetchedItems {
-            guard let id = entity.id, let name = entity.name, let priceString = entity.price, let price = Double(priceString) else { continue }
-            
-            if let existingItem = groupedItems[id] {
-                let updatedQuantity = existingItem.quantity + 1
-                groupedItems[id] = CartItem(productId: id, productName: name, quantity: updatedQuantity, price: price)
-            } else {
-                groupedItems[id] = CartItem(productId: id, productName: name, quantity: 1, price: price)
-            }
-        }
-        basketItems = Array(groupedItems.values)
+        viewModel.loadBasketItems()
         tableView.reloadData()
+        updateTotalPriceAndQuantity()
         updateEmptyBasketLabelVisibility()
     }
-
+    
     private func updateEmptyBasketLabelVisibility() {
-            emptyBasketLabel.isHidden = !basketItems.isEmpty
-        }
+        emptyBasketLabel.isHidden = !viewModel.basketItems.isEmpty
+    }
 
+    
     func updateTotalPriceAndQuantity() {
-        var totalPrice = 0.0
-        
-        for item in basketItems {
-            totalPrice += item.price * Double((item.quantity))
-        }
+        let totalPrice = viewModel.totalPrice
         let attributedString = NSMutableAttributedString(
             string: "Price: ",
-            attributes: [
-                NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18),
-                NSAttributedString.Key.foregroundColor: UIColor.blue
-            ]
+            attributes: [NSAttributedString.Key.font: UIFont.systemFont(ofSize: 18),
+                         NSAttributedString.Key.foregroundColor: UIColor.blue]
         )
-
+        
         let priceString = NSAttributedString(
             string: "\(totalPrice)₺",
-            attributes: [
-                NSAttributedString.Key.font: UIFont.boldSystemFont(ofSize: 18),
-                NSAttributedString.Key.foregroundColor: UIColor.black
-            ]
+            attributes: [NSAttributedString.Key.font: UIFont.boldSystemFont(ofSize: 18),
+                         NSAttributedString.Key.foregroundColor: UIColor.black]
         )
-
+        
         attributedString.append(priceString)
         totalPriceLabel.attributedText = attributedString
-
     }
+
 }
 extension BasketVC: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return basketItems.count
+        return viewModel.basketItems.count
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
@@ -157,31 +140,26 @@ extension BasketVC: UITableViewDelegate, UITableViewDataSource {
             return UITableViewCell()
         }
         
-        let cartItem = basketItems[indexPath.row]
+        let cartItem = viewModel.basketItems[indexPath.row]
         cell.configure(with: cartItem)
+        
         cell.onQuantityChanged = { [weak self] newQuantity in
-            self?.basketItems[indexPath.row].quantity = newQuantity
+            self?.viewModel.updateQuantity(atIndex: indexPath.row, newQuantity: newQuantity)
             self?.updateTotalPriceAndQuantity()
         }
         cell.onRemoveProduct = { [weak self] in
-            guard let strongSelf = self else { return }
-            
-            let productId = strongSelf.basketItems[indexPath.row].productId
-            strongSelf.basketItems.remove(at: indexPath.row)
-            strongSelf.tableView.deleteRows(at: [indexPath], with: .fade)
-            CoreDataManager.shared.removeCarFromCart(id: productId)
-            NotificationCenter.default.post(name: NSNotification.Name("BasketUpdated"), object: nil)
-            strongSelf.updateTotalPriceAndQuantity()
+            self?.viewModel.removeProductFromBasket(atIndex: indexPath.row)
             self?.loadBasketItems()
-
         }
+
+        
         return cell
     }
+    
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 50
     }
     
+    
 }
-extension Notification.Name {
-    static let BasketItemCountUpdated = Notification.Name("BasketItemCountUpdated")
-}
+

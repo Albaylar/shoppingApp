@@ -11,7 +11,6 @@ import CoreData
 
 
 final class HomeVC: UIViewController {
-    private let debouncer = Debouncer(delay: 0)
     private var viewModel = HomeViewModel()
     private let favoritesViewModel = FavoriteViewModel()
 //    private let basketVC = BasketVC()
@@ -38,6 +37,7 @@ final class HomeVC: UIViewController {
         super.viewDidLayoutSubviews()
         configureCollectionViewLayout()
     }
+    
     private func setupUI(){
         view.backgroundColor = .white
         let topView = UIView()
@@ -140,7 +140,6 @@ final class HomeVC: UIViewController {
             self.spinner.stopAnimating()
             self.collectionView.reloadData()
             self.updateNoResultLabel()
-
         }
     }
     private func setupNoResultLabel() {

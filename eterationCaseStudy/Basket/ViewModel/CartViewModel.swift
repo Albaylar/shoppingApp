@@ -7,54 +7,56 @@
 
 import Foundation
 
-class CartViewModel {
-    private(set) var cartItems: [CartItem] = []
+class BasketViewModel {
     
-    
-    func addProductToCart(productId: String, productName: String, priceString: String) {
-            guard let price = Double(priceString) else {
-                print("Fiyat dönüştürülemedi")
-                return
-            }
-            if let index = cartItems.firstIndex(where: { $0.productId == productId }) {
-                
-                cartItems[index].quantity += 1
+     var basketItems: [CartItem] = []
+
+    func loadBasketItems() {
+        let fetchedItems = CoreDataManager.shared.fetchBasketItems()
+        var groupedItems = [String: CartItem]()
+
+        for entity in fetchedItems {
+            guard let id = entity.id, let name = entity.name, let priceString = entity.price, let price = Double(priceString) else { continue }
+            
+            if let existingItem = groupedItems[id] {
+                let updatedQuantity = existingItem.quantity + 1
+                groupedItems[id] = CartItem(productId: id, productName: name, quantity: updatedQuantity, price: price)
             } else {
-                let newItem = CartItem(productId: productId, productName: productName, quantity: 1, price: price)
-                cartItems.append(newItem)
+                groupedItems[id] = CartItem(productId: id, productName: name, quantity: 1, price: price)
             }
-            updateCart()
         }
-    
-    func removeProductFromCart(productId: String) {
-        if let index = cartItems.firstIndex(where: { $0.productId == productId }) {
-            cartItems.remove(at: index)
-            updateCart()
+        basketItems = Array(groupedItems.values)
+    }
+
+    func removeProductFromBasket(atIndex index: Int) {
+        let productId = basketItems[index].productId
+        CoreDataManager.shared.removeCarFromCart(id: productId)
+        loadBasketItems()
+        NotificationCenter.default.post(name: NSNotification.Name("BasketUpdated"), object: nil)
+
+    }
+
+    func incrementQuantity(atIndex index: Int) {
+        basketItems[index].quantity += 1
+    }
+
+    func decrementQuantity(atIndex index: Int) {
+        if basketItems[index].quantity > 1 {
+            basketItems[index].quantity -= 1
+
         }
     }
-    func incrementQuantity(productId: String) {
-        if let index = cartItems.firstIndex(where: { $0.productId == productId }) {
-            cartItems[index].quantity += 1
-            updateCart()
+    func updateQuantity(atIndex index: Int, newQuantity: Int) {
+        guard index < basketItems.count else {
+            print("Index out of range")
+            return
         }
+        basketItems[index].quantity = newQuantity
     }
-    
-    func decrementQuantity(productId: String) {
-        if let index = cartItems.firstIndex(where: { $0.productId == productId }), cartItems[index].quantity > 1 {
-            cartItems[index].quantity -= 1
-            updateCart()
-        }
-    }
-    
-    private func updateCart() {
-        NotificationCenter.default.post(name: .cartUpdated, object: nil)
-    }
-        
+
     var totalPrice: Double {
-        cartItems.reduce(0) { $0 + $1.price * Double($1.quantity) }
+        basketItems.reduce(0) { $0 + $1.price * Double($1.quantity) }
     }
 }
-extension Notification.Name {
-    static let cartUpdated = Notification.Name("cartUpdated")
-}
+
 

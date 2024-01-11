@@ -95,11 +95,17 @@ extension FavoriteVC: UITableViewDataSource,UITableViewDelegate {
             
             let favoriteCar = favviewModel.favoriteCars[indexPath.row]
             favviewModel.deleteFavoriteCar(withId: favoriteCar.id)
-            favviewModel.favoriteCars.remove(at: indexPath.row)
-            tableView.deleteRows(at: [indexPath], with: .fade)
-            NotificationCenter.default.post(name: NSNotification.Name("FavoritesUpdated"), object: nil)
+            favviewModel.fetchFavorites()
+
+            // TableView da birden fazla güncelleme yapmak için kullanıldı.
+            tableView.performBatchUpdates({
+                tableView.deleteRows(at: [indexPath], with: .fade)
+            }, completion: { _ in
+                NotificationCenter.default.post(name: NSNotification.Name("FavoritesUpdated"), object: nil)
+            })
         }
     }
+
 }
 
 

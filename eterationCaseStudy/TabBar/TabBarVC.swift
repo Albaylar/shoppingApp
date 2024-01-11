@@ -13,10 +13,10 @@ class TabBarVC: UITabBarController {
     override func viewDidLoad() {
         super.viewDidLoad()
         setupUI()
-        
         NotificationCenter.default.addObserver(self, selector: #selector(updateBasketBadge), name: NSNotification.Name("BasketUpdated"), object: nil)
         updateBasketBadge()
     }
+    
     private func setupUI() {
         let viewController1 = HomeVC()
         let viewController2 = basketVC

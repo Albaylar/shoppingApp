@@ -26,6 +26,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
     }
     private func updateBasketBadge() {
+        
             let basketItemCount = CoreDataManager.shared.fetchBasketItems().count
 
             if let tabBarController = window?.rootViewController as? TabBarVC {

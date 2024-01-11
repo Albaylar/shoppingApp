@@ -20,9 +20,7 @@ final class CoreDataManager {
             }
             context = appDelegate.persistentContainer.viewContext
         }
-    
-    //MARK: - Functions
-    
+        
 //    func fetchAllCarItems() -> [Entity] {
 //        var coreDataItems = [Entity]()
 //        let appDelegate = UIApplication.shared.delegate as? AppDelegate
@@ -36,7 +34,8 @@ final class CoreDataManager {
 //        }
 //        return coreDataItems
 //    }
-    
+    // MARK: - Save Cars From CoreData
+
     func saveCarsToCoreData(data: Car?) {
         let appDelegate = UIApplication.shared.delegate as? AppDelegate
         let managedObjectContext = appDelegate?.persistentContainer.viewContext
@@ -73,7 +72,8 @@ final class CoreDataManager {
             return false
         }
     }
-    
+    // MARK: - Remove Cars in CoreData
+
     func removeCarItemFromCoreData(id: Int) {
         let appDelegate = UIApplication.shared.delegate as? AppDelegate
         let managedObjectContext = appDelegate?.persistentContainer.viewContext
@@ -92,11 +92,49 @@ final class CoreDataManager {
             print("Removing from Core Data failed: \(error.localizedDescription)")
         }
     }
+    // MARK: - Fetch Favorites
+    func fetchFavorites() -> [FavoriteCar] {
+        var favoriteCars: [FavoriteCar] = []
+        let fetchRequest = NSFetchRequest<NSManagedObject>(entityName: "Entity")
+
+        do {
+            let fetchedCars = try context.fetch(fetchRequest)
+            for car in fetchedCars {
+                guard
+                    let id = car.value(forKey: "id") as? String,
+                    let name = car.value(forKey: "name") as? String,
+                    let price = car.value(forKey: "price") as? String
+                else {
+                    continue
+                }
+                favoriteCars.append(FavoriteCar(id: id, name: name, price: price))
+            }
+        } catch let error as NSError {
+            print("Could not fetch favorites. \(error), \(error.userInfo)")
+        }
+        return favoriteCars
+    }
+
+    // MARK: - Delete Favorite Car
+    func deleteFavoriteCar(withId id: String) {
+        let fetchRequest: NSFetchRequest<NSFetchRequestResult> = NSFetchRequest(entityName: "Entity")
+        fetchRequest.predicate = NSPredicate(format: "id == %@", id)
+
+        do {
+            let results = try context.fetch(fetchRequest)
+            if let objectToDelete = results.first as? NSManagedObject {
+                context.delete(objectToDelete)
+                try context.save()
+            }
+        } catch let error as NSError {
+            print("Deleting error: \(error.localizedDescription), \(error.userInfo)")
+        }
+    }
     
-    // Sepett
+    // MARK: - Save Car to Cart or Basket
     func saveCarToCart(data: Car?, quantity: Int = 1) {
         guard let appDelegate = UIApplication.shared.delegate as? AppDelegate,
-              let carData = data else { return }
+        let carData = data else { return }
         let managedObjectContext = appDelegate.persistentContainer.viewContext
         
         let basketItem = NewEntity(context: managedObjectContext)
@@ -111,6 +149,8 @@ final class CoreDataManager {
             print("Error saving car to cart: \(error.localizedDescription)")
         }
     }
+
+    // MARK: - Remove Car in Basket
 
     func removeCarFromCart(id: String?) {
         guard let carId = id, let appDelegate = UIApplication.shared.delegate as? AppDelegate else {
@@ -133,6 +173,7 @@ final class CoreDataManager {
         }
     }
 
+    // MARK: - Fetch all of BasketItems
 
     func fetchBasketItems() -> [NewEntity] {
         var coreDataItems = [NewEntity]()
@@ -147,11 +188,12 @@ final class CoreDataManager {
         }
         return coreDataItems
     }
-    
-
-
 
 }
+
+
+
+
 
 
 
