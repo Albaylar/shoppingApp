@@ -221,10 +221,10 @@ extension HomeVC : UICollectionViewDataSource, UICollectionViewDelegate {
         detailVC.view.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         detailVC.didMove(toParent: self)
         
-        detailVC.onClose = { [weak self] in
+        detailVC.onClose = { [weak detailVC] in
             containerView.removeFromSuperview()
-            detailVC.view.removeFromSuperview()
-            detailVC.removeFromParent()
+            detailVC?.view.removeFromSuperview()
+            detailVC?.removeFromParent()
         }
     }
     @objc private func favoriteUpdate() {

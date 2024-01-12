@@ -24,7 +24,6 @@ final class CarService {
                 failure(errorMessage)
             }
         }
-        
     }
 }
 

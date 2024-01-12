@@ -21,6 +21,52 @@ class FavoriteVC: UIViewController {
         super.viewWillAppear(animated)
         updateFavorites()
     }
+    
+    @objc func favoritesUpdated() {
+        updateFavorites()
+    }
+    
+    private func updateFavorites() {
+        favviewModel.fetchFavorites()
+        tableView.reloadData()
+        checkForEmptyFavorites()
+    }
+    
+    private func checkForEmptyFavorites() {
+        noFavoritesLabel.isHidden = !favviewModel.favoriteCars.isEmpty
+    }
+}
+
+extension FavoriteVC: UITableViewDataSource,UITableViewDelegate {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return favviewModel.favoriteCars.count
+    }
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
+        let favoriteCar = favviewModel.favoriteCars[indexPath.row]
+        cell.textLabel?.text = "\(favoriteCar.name)"
+        cell.textLabel?.font = .boldSystemFont(ofSize: 22)
+        cell.textLabel?.textAlignment = .left
+        return cell
+    }
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == .delete {
+            
+            let favoriteCar = favviewModel.favoriteCars[indexPath.row]
+            favviewModel.deleteFavoriteCar(withId: favoriteCar.id)
+            favviewModel.fetchFavorites()
+
+            
+            tableView.performBatchUpdates({
+                tableView.deleteRows(at: [indexPath], with: .fade)
+            }, completion: { _ in
+                NotificationCenter.default.post(name: NSNotification.Name("FavoritesUpdated"), object: nil)
+            })
+        }
+    }
+
+}
+extension FavoriteVC {
     private func setupUI() {
         view.backgroundColor = .white
         let topView = UIView()
@@ -63,50 +109,8 @@ class FavoriteVC: UIViewController {
             make.right.left.bottom.equalToSuperview()
         }
     }
-    @objc func favoritesUpdated() {
-        updateFavorites()
-    }
-    
-    private func updateFavorites() {
-        favviewModel.fetchFavorites()
-        tableView.reloadData()
-        checkForEmptyFavorites()
-    }
-    
-    private func checkForEmptyFavorites() {
-        noFavoritesLabel.isHidden = !favviewModel.favoriteCars.isEmpty
-    }
 }
 
-extension FavoriteVC: UITableViewDataSource,UITableViewDelegate {
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return favviewModel.favoriteCars.count
-    }
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
-        let favoriteCar = favviewModel.favoriteCars[indexPath.row]
-        cell.textLabel?.text = "\(favoriteCar.name)"
-        cell.textLabel?.font = .boldSystemFont(ofSize: 22)
-        cell.textLabel?.textAlignment = .left
-        return cell
-    }
-    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
-        if editingStyle == .delete {
-            
-            let favoriteCar = favviewModel.favoriteCars[indexPath.row]
-            favviewModel.deleteFavoriteCar(withId: favoriteCar.id)
-            favviewModel.fetchFavorites()
-
-            // TableView da birden fazla güncelleme yapmak için kullanıldı.
-            tableView.performBatchUpdates({
-                tableView.deleteRows(at: [indexPath], with: .fade)
-            }, completion: { _ in
-                NotificationCenter.default.post(name: NSNotification.Name("FavoritesUpdated"), object: nil)
-            })
-        }
-    }
-
-}
 
 
 

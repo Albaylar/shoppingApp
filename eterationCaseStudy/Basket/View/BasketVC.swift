@@ -23,13 +23,55 @@ final class BasketVC: UIViewController {
         NotificationCenter.default.addObserver(self, selector: #selector(loadBasketItems), name: NSNotification.Name("BasketUpdated"), object: nil)
         setupEmptyBasketLabel()
     }
+    
     override func viewWillAppear(_ animated: Bool) {
         loadBasketItems()
         updateTotalPriceAndQuantity()
         
     }
+
+    @objc func loadBasketItems() {
+        viewModel.loadBasketItems()
+        tableView.reloadData()
+        updateTotalPriceAndQuantity()
+        updateEmptyBasketLabelVisibility()
+    }
     
-    func setupUI() {
+    private func updateEmptyBasketLabelVisibility() {
+        emptyBasketLabel.isHidden = !viewModel.basketItems.isEmpty
+    }
+}
+extension BasketVC: UITableViewDelegate, UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return viewModel.basketItems.count
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        guard let cell = tableView.dequeueReusableCell(withIdentifier: "customCell", for: indexPath) as? BasketCell else {
+            return UITableViewCell()
+        }
+        
+        let cartItem = viewModel.basketItems[indexPath.row]
+        cell.configure(with: cartItem)
+        
+        cell.onQuantityChanged = { [weak self] newQuantity in
+            self?.viewModel.updateQuantity(atIndex: indexPath.row, newQuantity: newQuantity)
+            self?.updateTotalPriceAndQuantity()
+        }
+        cell.onRemoveProduct = { [weak self] in
+            self?.viewModel.removeProductFromBasket(atIndex: indexPath.row)
+            self?.loadBasketItems()
+        }
+        return cell
+    }
+    
+    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
+        return 50
+    }
+}
+
+extension BasketVC {
+    private func setupUI() {
         view.backgroundColor = .white
         let topView = UIView()
         topView.backgroundColor = UIColor(red: 0.16, green: 0.35, blue: 1.00, alpha: 1.00)
@@ -98,20 +140,7 @@ final class BasketVC: UIViewController {
             make.left.right.equalToSuperview().inset(20)
         }
     }
-    
-    @objc func loadBasketItems() {
-        viewModel.loadBasketItems()
-        tableView.reloadData()
-        updateTotalPriceAndQuantity()
-        updateEmptyBasketLabelVisibility()
-    }
-    
-    private func updateEmptyBasketLabelVisibility() {
-        emptyBasketLabel.isHidden = !viewModel.basketItems.isEmpty
-    }
-
-    
-    func updateTotalPriceAndQuantity() {
+    private func updateTotalPriceAndQuantity() {
         let totalPrice = viewModel.totalPrice
         let attributedString = NSMutableAttributedString(
             string: "Price: ",
@@ -128,38 +157,5 @@ final class BasketVC: UIViewController {
         attributedString.append(priceString)
         totalPriceLabel.attributedText = attributedString
     }
-
-}
-extension BasketVC: UITableViewDelegate, UITableViewDataSource {
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return viewModel.basketItems.count
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: "customCell", for: indexPath) as? BasketCell else {
-            return UITableViewCell()
-        }
-        
-        let cartItem = viewModel.basketItems[indexPath.row]
-        cell.configure(with: cartItem)
-        
-        cell.onQuantityChanged = { [weak self] newQuantity in
-            self?.viewModel.updateQuantity(atIndex: indexPath.row, newQuantity: newQuantity)
-            self?.updateTotalPriceAndQuantity()
-        }
-        cell.onRemoveProduct = { [weak self] in
-            self?.viewModel.removeProductFromBasket(atIndex: indexPath.row)
-            self?.loadBasketItems()
-        }
-
-        
-        return cell
-    }
-    
-    func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        return 50
-    }
-    
-    
 }
 
